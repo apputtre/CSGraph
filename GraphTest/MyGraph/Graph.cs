@@ -2,7 +2,56 @@ using System.Collections.Generic;
 
 namespace Graph
 {
-    public abstract class Graph<TVertexData, TEdgeData>
+    public abstract class Graph
+    {
+        public abstract IEnumerable<Vertex> Vertices { get; }
+        public abstract IEnumerable<Edge> Edges { get; }
+
+        public abstract bool ContainsVertex(Vertex vertex);
+        public abstract TVertex NewVertex();
+        public abstract void RemoveVertex(TVertex toRemove);
+        public abstract bool ContainsEdge(TVertex from, TVertex to);
+        public abstract void AddEdge(TVertex from, TVertex to, TEdgeData? data);
+        public virtual void AddEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
+        public abstract void RemoveEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
+        public abstract TVertexData? GetVertexData(Vertex<TVertexData, TEdgeData> vertex);
+        public abstract void SetVertexData(Vertex<TVertexData, TEdgeData> vertex, TVertexData? data);
+        public abstract TEdgeData? GetEdgeData(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
+        public abstract Edge<TVertexData, TEdgeData> GetEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
+        public abstract void SetEdgeData(Vertex<TVertexData, TEdgeData> index1, Vertex<TVertexData, TEdgeData> index2, TEdgeData? data);
+        public abstract Vertex<TVertexData, TEdgeData>[] GetNeighbors(Vertex<TVertexData, TEdgeData> vertex);
+        public abstract Vertex<TVertexData, TEdgeData>[] GetVertices(TVertexData data);
+    }
+
+    public abstract class Graph<TVertexData, TEdgeData> : Graph
+    {
+        protected GraphRepresentation rep;
+
+        new public abstract IEnumerable<Vertex<TVertexData>> Vertices { get; }
+        new public abstract IEnumerable<Edge<TEdgeData>> Edges { get; }
+
+        public abstract bool ContainsVertex(TVertex vertex);
+        public abstract TVertex NewVertex();
+        public abstract void RemoveVertex(TVertex toRemove);
+        public abstract bool ContainsEdge(TVertex from, TVertex to);
+        public abstract void AddEdge(TVertex from, TVertex to, TEdgeData? data);
+
+        public virtual void AddEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to)
+        {
+            AddEdge(from, to, default(TEdgeData));
+        }
+
+        public abstract void RemoveEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
+        public abstract TVertexData? GetVertexData(Vertex<TVertexData, TEdgeData> vertex);
+        public abstract void SetVertexData(Vertex<TVertexData, TEdgeData> vertex, TVertexData? data);
+        public abstract TEdgeData? GetEdgeData(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
+        public abstract Edge<TVertexData, TEdgeData> GetEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
+        public abstract void SetEdgeData(Vertex<TVertexData, TEdgeData> index1, Vertex<TVertexData, TEdgeData> index2, TEdgeData? data);
+        public abstract Vertex<TVertexData, TEdgeData>[] GetNeighbors(Vertex<TVertexData, TEdgeData> vertex);
+        public abstract Vertex<TVertexData, TEdgeData>[] GetVertices(TVertexData data);
+    }
+
+    public abstract class Graph<TVertexData, TEdgeData> : Graph
     {
         protected GraphRepresentation<TVertexData, TEdgeData> rep;
 

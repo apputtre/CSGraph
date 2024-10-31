@@ -1,7 +1,19 @@
 
 namespace Graph
 {
-    public class Edge<TVertexData, TEdgeData>
+    public class Edge
+    {
+        public Vertex From { get; set; }
+        public Vertex To { get; set; }
+
+        public Edge(Vertex from, Vertex to)
+        {
+            From = from;
+            To = to;
+        }
+    }
+
+    public class Edge<TEdgeData> : Edge
     {
         private TEdgeData? data;
 
@@ -9,13 +21,9 @@ namespace Graph
         {
             get => data;
         }
-        public Vertex<TVertexData, TEdgeData> From {get; set;}
-        public Vertex<TVertexData, TEdgeData> To {get; set;}
 
-        public Edge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to, TEdgeData? data)
+        public Edge(Vertex from, Vertex to, TEdgeData? data) : base(from, to)
         {
-            From = from;
-            To = to;
             this.data = data;
         }
     }

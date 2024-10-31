@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System;
+using System.ComponentModel;
 
 namespace Graph
 {
-    public class AdjacencyList<TVertexData, TEdgeData> : GraphRepresentation<TVertexData, TEdgeData>
+    public class AdjacencyList<TVertex> : GraphRepresentation<TVertex>
+        where TVertex : Vertex, new()
     {
         private List<Vertex?> vertices = new();
         private int nextIndex = 0;
@@ -30,51 +32,20 @@ namespace Graph
             return false;
         }
 
-        public override int AddVertex(TVertexData? data)
+        public override int AddVertex()
         {
-            vertices.Add(new Vertex(nextIndex, data, new List<Edge>()));
+            TVertex vertex = TVertex.Create()
             return nextIndex++;
         }
 
-        public override void AddEdge(int index1, int index2, TEdgeData? data)
+        public override void AddEdge(Edge e)
         {
-            try
-            {
-                vertices[index1].Connections.Add(new Edge(vertices[index2], Data: data));
-            }
-            catch (NullReferenceException)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
+            throw new NotImplementedException();
         }
 
-
-        public override TEdgeData? GetEdgeData(int index1, int index2)
+        public override void AddEdge(int index1, int index2)
         {
-            try
-            {
-                foreach (Edge edge in vertices[index1].Connections)
-                    if (edge.To.Index == index2)
-                        return edge.Data;
-                
-                throw new ArgumentException();
-            }
-            catch(NullReferenceException)
-            {
-                throw new ArgumentException();
-            }
-        }
-
-        public override TVertexData GetVertexData(int index)
-        {
-            try
-            {
-                return vertices[index].Data;
-            }
-            catch (NullReferenceException)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
+            AddEdge(new Edge(index1, index2));
         }
 
         public override void RemoveEdge(int index1, int index2)
@@ -102,32 +73,6 @@ namespace Graph
                     RemoveEdge(index, edge.To.Index);
                 
                 vertices[index] = null;
-            }
-            catch (NullReferenceException)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-        }
-
-        public override void SetEdgeData(int index1, int index2, TEdgeData data)
-        {
-            try
-            {
-                foreach (Edge edge in vertices[index1].Connections)
-                    if (edge.To.Index == index2)
-                        edge.Data = data;
-            }
-            catch (NullReferenceException)
-            {
-                throw new ArgumentException();
-            }
-        }
-
-        public override void SetVertexData(int index, TVertexData data)
-        {
-            try
-            {
-                vertices[index].Data = data;
             }
             catch (NullReferenceException)
             {

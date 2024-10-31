@@ -2,33 +2,81 @@ using System;
 
 namespace Graph
 {
-    public class Vertex<TVertexData, TEdgeData>
+    public class Vertex
     {
-        private Graph<TVertexData, TEdgeData>? parent;
-        private int index;
+        public int Index
+        {
+            get => index;
+            set
+            {
+                if (indexInitialized)
+                    throw new InvalidOperationException();
+
+                Index = value;
+                indexInitialized = true;
+            }
+        }
+
+        public virtual int Data { get => index; }
+
+        protected Graph? parent;
+        protected int index;
+        protected bool indexInitialized = false;
+
+        public Vertex[] Neighbors
+        {
+            get
+            {
+                if (parent == null)
+                    throw new InvalidOperationException();
+
+                return parent.GetNeighbors(this);
+            }
+        }
+
+        private Vertex(Graph? parent = null, int index = -1)
+        {
+            this.parent = parent;
+            this.index = index;
+        }
+
+        public static Vertex Create(Graph? parent = null, int index = -1)
+        {
+            Vertex v = new(parent, index);
+            return v;
+        }
+    }
+
+    public class Vertex<TVertexData> : Vertex
+    {
+        new public TVertexData? Data { get; set; }
+
         private TVertexData? data;
 
-        public Vertex(Graph<TVertexData, TEdgeData>? parent = null, int index = -1, TVertexData? data = default(TVertexData))
+        private Vertex(Graph<Vertex<TVertexData>>? parent = null, int index = -1, TVertexData? data)
         {
             this.parent = parent;
             this.index = index;
             this.data = data;
         }
 
-        public int Index
+        new public static Vertex Create(Graph? parent = null, int index = -1, TVertexData? data = null)
         {
-            get => index;
+            Vertex v = new Vertex(parent, index, data);
+            return v;
         }
+    }
 
-        public Vertex<TVertexData, TEdgeData>[] Neighbors
+    public class Vertex<TVertexData, TEdgeData> : Vertex
+    {
+
+        private TVertexData? data;
+
+        public Vertex(Graph? parent = null, int index = -1, TVertexData? data = default(TVertexData))
         {
-            get
-            {
-                if (parent == null)
-                    throw new InvalidOperationException();
-                
-                return parent.GetNeighbors(this);
-            }
+            this.parent = parent;
+            this.index = index;
+            this.data = data;
         }
 
         public TVertexData? Data
