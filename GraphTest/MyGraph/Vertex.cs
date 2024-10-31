@@ -4,48 +4,39 @@ namespace Graph
 {
     public class Vertex
     {
-        public int Index
-        {
-            get => index;
-            set
-            {
-                if (indexInitialized)
-                    throw new InvalidOperationException();
+        public int Index => index;
+        public ICollection<Vertex> Neighbors => throw new NotImplementedException();
 
-                Index = value;
-                indexInitialized = true;
-            }
-        }
-
-        public virtual int Data { get => index; }
-
-        protected Graph? parent;
         protected int index;
-        protected bool indexInitialized = false;
+        protected Graph? parent;
 
-        public Vertex[] Neighbors
+        public Vertex(Graph? parent = null, int index = -1)
         {
-            get
-            {
-                if (parent == null)
-                    throw new InvalidOperationException();
-
-                return parent.GetNeighbors(this);
-            }
+            this.parent = parent;
+            this.index = index;
         }
+    }
 
-        private Vertex(Graph? parent = null, int index = -1)
+    public class Vertex<V, E> : Vertex
+    {
+        public V? Data => data;
+        new public ICollection<Vertex<V, E>> Neighbors => throw new NotImplementedException();
+
+        protected V? data;
+
+        public Vertex(Graph<V, E>? parent = null, int index = -1)
         {
             this.parent = parent;
             this.index = index;
         }
 
-        public static Vertex Create(Graph? parent = null, int index = -1)
+        public Vertex(Graph<V, E>? parent, int index, V data) : this(parent, index)
         {
-            Vertex v = new(parent, index);
-            return v;
+            this.data = data;
         }
     }
+
+    /*
 
     public class Vertex<TVertexData> : Vertex
     {
@@ -122,4 +113,5 @@ namespace Graph
             return Tuple.Create(parent, Index).GetHashCode();
         }
     }
+    */
 }

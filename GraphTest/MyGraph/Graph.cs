@@ -2,100 +2,140 @@ using System.Collections.Generic;
 
 namespace Graph
 {
-    public abstract class Graph
+    public class Graph
     {
-        public abstract IEnumerable<Vertex> Vertices { get; }
-        public abstract IEnumerable<Edge> Edges { get; }
+        public virtual IEnumerable<Vertex> Vertices => throw new NotImplementedException();
+        public virtual IEnumerable<Edge> Edges => throw new NotImplementedException();
 
-        public abstract bool ContainsVertex(Vertex vertex);
-        public abstract TVertex NewVertex();
-        public abstract void RemoveVertex(TVertex toRemove);
-        public abstract bool ContainsEdge(TVertex from, TVertex to);
-        public abstract void AddEdge(TVertex from, TVertex to, TEdgeData? data);
-        public virtual void AddEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
-        public abstract void RemoveEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
-        public abstract TVertexData? GetVertexData(Vertex<TVertexData, TEdgeData> vertex);
-        public abstract void SetVertexData(Vertex<TVertexData, TEdgeData> vertex, TVertexData? data);
-        public abstract TEdgeData? GetEdgeData(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
-        public abstract Edge<TVertexData, TEdgeData> GetEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
-        public abstract void SetEdgeData(Vertex<TVertexData, TEdgeData> index1, Vertex<TVertexData, TEdgeData> index2, TEdgeData? data);
-        public abstract Vertex<TVertexData, TEdgeData>[] GetNeighbors(Vertex<TVertexData, TEdgeData> vertex);
-        public abstract Vertex<TVertexData, TEdgeData>[] GetVertices(TVertexData data);
-    }
-
-    public abstract class Graph<TVertexData, TEdgeData> : Graph
-    {
         protected GraphRepresentation rep;
 
-        new public abstract IEnumerable<Vertex<TVertexData>> Vertices { get; }
-        new public abstract IEnumerable<Edge<TEdgeData>> Edges { get; }
-
-        public abstract bool ContainsVertex(TVertex vertex);
-        public abstract TVertex NewVertex();
-        public abstract void RemoveVertex(TVertex toRemove);
-        public abstract bool ContainsEdge(TVertex from, TVertex to);
-        public abstract void AddEdge(TVertex from, TVertex to, TEdgeData? data);
-
-        public virtual void AddEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to)
+        public Graph(bool sparse = true)
         {
-            AddEdge(from, to, default(TEdgeData));
+            if (sparse)
+                rep = new AdjacencyList();
+            else
+                throw new NotImplementedException();
         }
 
-        public abstract void RemoveEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
-        public abstract TVertexData? GetVertexData(Vertex<TVertexData, TEdgeData> vertex);
-        public abstract void SetVertexData(Vertex<TVertexData, TEdgeData> vertex, TVertexData? data);
-        public abstract TEdgeData? GetEdgeData(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
-        public abstract Edge<TVertexData, TEdgeData> GetEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
-        public abstract void SetEdgeData(Vertex<TVertexData, TEdgeData> index1, Vertex<TVertexData, TEdgeData> index2, TEdgeData? data);
-        public abstract Vertex<TVertexData, TEdgeData>[] GetNeighbors(Vertex<TVertexData, TEdgeData> vertex);
-        public abstract Vertex<TVertexData, TEdgeData>[] GetVertices(TVertexData data);
+        public bool ContainsVertex(Vertex vertex)
+        {
+            return rep.ContainsVertex(vertex);
+        }
+
+        public virtual Vertex NewVertex()
+        {
+            return rep.NewVertex();
+        }
+
+        public void RemoveVertex(Vertex toRemove)
+        {
+            rep.RemoveVertex(toRemove);
+        }
+
+        public virtual bool ContainsEdge(Vertex from, Vertex to)
+        {
+            return rep.AreConnected(from, to) || rep.AreConnected(to, from);
+        }
+
+        public virtual void AddEdge(Vertex from, Vertex to)
+        {
+            AddEdge(from, to);
+            AddEdge(to, from);
+        }
+
+        public virtual void RemoveEdge(Vertex from, Vertex to)
+        {
+            rep.RemoveEdge(from, to);
+
+            if (rep.AreConnected(to, from))
+                rep.RemoveEdge(to, from);
+        }
+        public virtual Edge GetEdge(Vertex from, Vertex to)
+        {
+            return rep.GetEdge(from, to);
+        }
+
+        public virtual Vertex[] GetNeighbors(Vertex vertex)
+        {
+            return rep.GetConnected(vertex);
+        }
+
+        public virtual Vertex GetVertex(int index)
+        {
+            return rep.GetVertex(index);
+        }
     }
 
-    public abstract class Graph<TVertexData, TEdgeData> : Graph
+    public class Graph<V, E> : Graph
     {
-        protected GraphRepresentation<TVertexData, TEdgeData> rep;
+        public override IEnumerable<Vertex<V, E>> Vertices => throw new NotImplementedException();
+        public override IEnumerable<Edge<V, E>> Edges => throw new NotImplementedException();
 
-        public virtual Vertex<TVertexData, TEdgeData>[] Vertices
+        protected GraphRepresentation<V, E> rep;
+
+        public Graph(bool sparse = true)
         {
-            get
-            {
-                int[] indices = rep.Vertices;
-
-                List<Vertex<TVertexData, TEdgeData>> ret = new();
-
-                foreach (int i in indices)
-                    ret.Add(new Vertex<TVertexData, TEdgeData>(this, i, rep.GetVertexData(i)));
-                
-                return ret.ToArray();
-            }
+            if (sparse)
+                rep = new AdjacencyList<V, E>(this);
+            else
+                throw new NotImplementedException();
         }
 
-        public abstract bool ContainsVertex(Vertex<TVertexData, TEdgeData> vertex);
-        public abstract Vertex<TVertexData, TEdgeData> AddVertex(TVertexData? data);
-
-        public virtual Vertex<TVertexData, TEdgeData> AddVertex()
+        public override Vertex<V, E> NewVertex()
         {
-            return AddVertex(default(TVertexData));
+            return rep.NewVertex();
         }
 
-        public abstract Vertex<TVertexData, TEdgeData> AddVertex(Vertex<TVertexData, TEdgeData> other);
-
-        public abstract void RemoveVertex(Vertex<TVertexData, TEdgeData> toRemove);
-        public abstract bool ContainsEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
-        public abstract void AddEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to, TEdgeData? data);
-
-        public virtual void AddEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to)
+        public override bool ContainsEdge(Vertex from, Vertex to)
         {
-            AddEdge(from, to, default(TEdgeData));
+            return rep.AreConnected(from, to) || rep.AreConnected(to, from);
         }
 
-        public abstract void RemoveEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
-        public abstract TVertexData? GetVertexData(Vertex<TVertexData, TEdgeData> vertex);
-        public abstract void SetVertexData(Vertex<TVertexData, TEdgeData> vertex, TVertexData? data);
-        public abstract TEdgeData? GetEdgeData(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
-        public abstract Edge<TVertexData, TEdgeData> GetEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to);
-        public abstract void SetEdgeData(Vertex<TVertexData, TEdgeData> index1, Vertex<TVertexData, TEdgeData> index2, TEdgeData? data);
-        public abstract Vertex<TVertexData, TEdgeData>[] GetNeighbors(Vertex<TVertexData, TEdgeData> vertex);
-        public abstract Vertex<TVertexData, TEdgeData>[] GetVertices(TVertexData data);
+        public override void AddEdge(Vertex from, Vertex to)
+        {
+            AddEdge(from, to);
+            AddEdge(to, from);
+        }
+
+        public void AddEdge(Vertex<V, E> from, Vertex<V, E> to, E? data)
+        {
+            rep.AddEdge(from, to, data);
+        }
+
+        public override void RemoveEdge(Vertex from, Vertex to)
+        {
+            rep.RemoveEdge(from, to);
+
+            if (rep.AreConnected(to, from))
+                rep.RemoveEdge(to, from);
+        }
+        public override Edge<V, E> GetEdge(Vertex from, Vertex to)
+        {
+            return rep.GetEdge(from, to);
+        }
+        public override Vertex[] GetNeighbors(Vertex vertex)
+        {
+            return rep.GetConnected(vertex);
+        }
+
+        public override Vertex<V, E> GetVertex(int index)
+        {
+            return rep.GetVertex(index);
+        }
     }
+
+    /*
+    public class Digraph<V, E> : Graph<V, E>
+    {
+        public override void AddEdge(Vertex from, Vertex to)
+        {
+            rep.AddEdge(from, to);
+        }
+
+        public override void RemoveEdge(Vertex from, Vertex to)
+        {
+            rep.RemoveEdge(from, to);
+        }
+    }
+    */
 }

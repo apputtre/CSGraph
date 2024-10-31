@@ -79,7 +79,7 @@ class GraphTest
         */
 
         // initialize my graph
-        Graph.DirectedGraph<string, int> graph = new();
+        Graph.Digraph<string, int> graph = new();
 
         Graph.Vertex<String, int> v_ny = graph.AddVertex("New York");
         V v_chicago = graph.AddVertex("Chicago");

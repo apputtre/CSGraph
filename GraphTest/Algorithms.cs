@@ -112,7 +112,7 @@ namespace Graph
             while (to_visit.Count > 0)
             {
                 // find the node in to_visit which has the least cost path from the start node
-                Vertex<TVertexData, int> next = new();
+                Vertex<TVertexData, int>? next = new();
                 {
                     int min_cost = int.MaxValue;
                     foreach (Vertex<TVertexData, int> v in to_visit)
@@ -123,10 +123,13 @@ namespace Graph
                         }
                 }
 
+                if (next == null)
+                    throw new InvalidOperationException();
+
                 foreach (Vertex<TVertexData, int> neighbor in next.Neighbors)
                 {
                     // if the path to neighbor through this node is less than that of the existing path
-                    int cost = costs[next] + g.GetEdgeData(next, neighbor);
+                    int cost = costs[next] + g.GetEdge(next, neighbor).Data;
                     if (cost < costs[neighbor])
                     {
                         // update the costs and routes tables
@@ -149,7 +152,7 @@ namespace Graph
             {
                 Console.Write("{0}: {{ ", v.Data);
                 foreach (var neighbor in v.Neighbors)
-                    Console.Write("({0} {1}), ", neighbor.Data, g.GetEdgeData(v, neighbor));
+                    Console.Write("({0} {1}), ", neighbor.Data, g.GetEdge(v, neighbor).Data);
                 Console.Write("}}\n");
             }
         }
