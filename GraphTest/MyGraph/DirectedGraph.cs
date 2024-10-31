@@ -1,5 +1,5 @@
 
-namespace MyGraph
+namespace Graph
 {
     public class DirectedGraph<TVertexData, TEdgeData> : Graph<TVertexData, TEdgeData>
     {
@@ -70,5 +70,24 @@ namespace MyGraph
             rep.SetVertexData(vertex.Index, data);
         }
 
+        public override Vertex<TVertexData, TEdgeData> AddVertex(Vertex<TVertexData, TEdgeData> other)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Vertex<TVertexData, TEdgeData>[] GetVertices(TVertexData data)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override bool ContainsEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override Edge<TVertexData, TEdgeData> GetEdge(Vertex<TVertexData, TEdgeData> from, Vertex<TVertexData, TEdgeData> to)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -1,5 +1,5 @@
 
-namespace MyGraph
+namespace Graph
 {
     public abstract class GraphRepresentation<TVertexData, TEdgeData>
     {

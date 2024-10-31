@@ -1,4 +1,7 @@
-namespace MyGraph
+using System.Collections.Generic;
+using System;
+
+namespace Graph
 {
     public class AdjacencyList<TVertexData, TEdgeData> : GraphRepresentation<TVertexData, TEdgeData>
     {
@@ -9,13 +12,13 @@ namespace MyGraph
         {
             get
             {
-                int[] indices = new int[vertices.Count];
+                List<int> indices = new();
 
                 for (int i = 0; i < vertices.Count; ++i)
                     if (vertices[i] is not null)
-                        indices[i] = vertices[i].Index;
+                        indices.Add(i);
                 
-                return indices;
+                return indices.ToArray();
             }
         }
 

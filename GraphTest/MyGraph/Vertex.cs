@@ -1,6 +1,6 @@
 using System;
 
-namespace MyGraph
+namespace Graph
 {
     public class Vertex<TVertexData, TEdgeData>
     {

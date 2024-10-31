@@ -1,4 +1,6 @@
-namespace MyGraph
+using System;
+
+namespace Graph
 {
     public class AdjacencyMatrix<TVertexData, TEdgeData> : GraphRepresentation<TVertexData, TEdgeData>
     {
