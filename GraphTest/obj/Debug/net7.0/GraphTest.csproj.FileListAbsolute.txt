@@ -1,0 +1,15 @@
+C:\Users\Revch\src\data_structures\graph\GraphTest\obj\Debug\net7.0\GraphTest.csproj.AssemblyReference.cache
+C:\Users\Revch\src\data_structures\graph\GraphTest\obj\Debug\net7.0\GraphTest.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Revch\src\data_structures\graph\GraphTest\obj\Debug\net7.0\GraphTest.AssemblyInfoInputs.cache
+C:\Users\Revch\src\data_structures\graph\GraphTest\obj\Debug\net7.0\GraphTest.AssemblyInfo.cs
+C:\Users\Revch\src\data_structures\graph\GraphTest\obj\Debug\net7.0\GraphTest.csproj.CoreCompileInputs.cache
+C:\Users\Revch\src\data_structures\graph\GraphTest\bin\Debug\net7.0\GraphTest.exe
+C:\Users\Revch\src\data_structures\graph\GraphTest\bin\Debug\net7.0\GraphTest.deps.json
+C:\Users\Revch\src\data_structures\graph\GraphTest\bin\Debug\net7.0\GraphTest.runtimeconfig.json
+C:\Users\Revch\src\data_structures\graph\GraphTest\bin\Debug\net7.0\GraphTest.dll
+C:\Users\Revch\src\data_structures\graph\GraphTest\bin\Debug\net7.0\GraphTest.pdb
+C:\Users\Revch\src\data_structures\graph\GraphTest\obj\Debug\net7.0\GraphTest.dll
+C:\Users\Revch\src\data_structures\graph\GraphTest\obj\Debug\net7.0\refint\GraphTest.dll
+C:\Users\Revch\src\data_structures\graph\GraphTest\obj\Debug\net7.0\GraphTest.pdb
+C:\Users\Revch\src\data_structures\graph\GraphTest\obj\Debug\net7.0\GraphTest.genruntimeconfig.cache
+C:\Users\Revch\src\data_structures\graph\GraphTest\obj\Debug\net7.0\ref\GraphTest.dll

@@ -1,7 +1,7 @@
 ﻿using MitchellGraph;
-using MyGraph;
+using Graph;
 
-using V = MyGraph.Vertex<string, int>;
+using V = Graph.Vertex<string, int>;
 
 class GraphTest
 {
@@ -79,9 +79,9 @@ class GraphTest
         */
 
         // initialize my graph
-        MyGraph.DirectedGraph<string, int> graph = new();
+        Graph.DirectedGraph<string, int> graph = new();
 
-        MyGraph.Vertex<String, int> v_ny = graph.AddVertex("New York");
+        Graph.Vertex<String, int> v_ny = graph.AddVertex("New York");
         V v_chicago = graph.AddVertex("Chicago");
         var v_miami = graph.AddVertex("Miami");
         var v_dallas = graph.AddVertex("Dallas");
@@ -106,28 +106,28 @@ class GraphTest
 
         Console.WriteLine("Graph:");
 
-        MyGraph.Algorithms.PrintGraph(graph);
+        Graph.Algorithms.PrintGraph(graph);
 
         // run Dijkstra's algorithm on my graph
-        Dictionary<MyGraph.Vertex<string, int>, int> costs = new();
-        Dictionary<MyGraph.Vertex<string, int>, MyGraph.Vertex<string, int>?> routes = new();
-        MyGraph.Algorithms.Dijkstra(graph, v_ny, v_la, out costs, out routes);
+        Dictionary<Graph.Vertex<string, int>, int> costs = new();
+        Dictionary<Graph.Vertex<string, int>, Graph.Vertex<string, int>?> routes = new();
+        Graph.Algorithms.Dijkstra(graph, v_ny, v_la, out costs, out routes);
 
         Console.WriteLine();
 
         Console.WriteLine("Costs table:");
-        foreach (KeyValuePair<MyGraph.Vertex<string, int>, int> pair in costs)
+        foreach (KeyValuePair<Graph.Vertex<string, int>, int> pair in costs)
             Console.WriteLine("{0}: {1}", pair.Key.Data, pair.Value);
 
         Console.WriteLine();
 
         Console.WriteLine("Routes table:");
-        foreach (KeyValuePair<MyGraph.Vertex<string, int>, MyGraph.Vertex<string, int>?> pair in routes)
+        foreach (KeyValuePair<Graph.Vertex<string, int>, Graph.Vertex<string, int>?> pair in routes)
             Console.WriteLine("{0}: {1}", pair.Key.Data, pair.Value == null ? "null" : pair.Value.Data);
 
-        List<MyGraph.Vertex<string, int>> min_cost_path = [];
+        List<Graph.Vertex<string, int>> min_cost_path = new();
 
-        MyGraph.Vertex<string, int>? next = v_la;
+        Graph.Vertex<string, int>? next = v_la;
         while (next != null)
         {
             min_cost_path.Add(next);
@@ -138,7 +138,7 @@ class GraphTest
 
         Console.WriteLine();
         Console.WriteLine("Min cost path:");
-        foreach (MyGraph.Vertex<string, int> v in min_cost_path)
+        foreach (Graph.Vertex<string, int> v in min_cost_path)
             Console.WriteLine(v.Data);
     }
     

@@ -77,7 +77,7 @@ namespace MitchellGraph
     }
 }
 
-namespace MyGraph
+namespace Graph
 {
     public class Algorithms
     {
@@ -90,11 +90,11 @@ namespace MyGraph
             out Dictionary<Vertex<TVertexData, int>, Vertex<TVertexData, int>?> routes
         )
         {
-            costs = [];
-            routes = [];
+            costs = new();
+            routes = new();
 
             // create list of nodes to visit
-            List<Vertex<TVertexData, int>> to_visit = [];
+            List<Vertex<TVertexData, int>> to_visit = new();
 
             // initialize costs, routes, and to_visit
             foreach (Vertex<TVertexData, int> v in g.Vertices)
