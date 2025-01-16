@@ -1,0 +1,15 @@
+C:\Users\Revch\src\data_structures\graph\obj\Debug\net8.0\graph.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Revch\src\data_structures\graph\obj\Debug\net8.0\graph.AssemblyInfoInputs.cache
+C:\Users\Revch\src\data_structures\graph\obj\Debug\net8.0\graph.AssemblyInfo.cs
+C:\Users\Revch\src\data_structures\graph\obj\Debug\net8.0\graph.csproj.CoreCompileInputs.cache
+C:\Users\Revch\src\data_structures\graph\obj\Debug\net8.0\graph.sourcelink.json
+C:\Users\Revch\src\data_structures\graph\bin\Debug\net8.0\graph.exe
+C:\Users\Revch\src\data_structures\graph\bin\Debug\net8.0\graph.deps.json
+C:\Users\Revch\src\data_structures\graph\bin\Debug\net8.0\graph.runtimeconfig.json
+C:\Users\Revch\src\data_structures\graph\bin\Debug\net8.0\graph.dll
+C:\Users\Revch\src\data_structures\graph\bin\Debug\net8.0\graph.pdb
+C:\Users\Revch\src\data_structures\graph\obj\Debug\net8.0\graph.dll
+C:\Users\Revch\src\data_structures\graph\obj\Debug\net8.0\refint\graph.dll
+C:\Users\Revch\src\data_structures\graph\obj\Debug\net8.0\graph.pdb
+C:\Users\Revch\src\data_structures\graph\obj\Debug\net8.0\graph.genruntimeconfig.cache
+C:\Users\Revch\src\data_structures\graph\obj\Debug\net8.0\ref\graph.dll

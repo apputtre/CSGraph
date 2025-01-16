@@ -1,3 +1,5 @@
+#if false
+
 using System.Numerics;
 
 namespace MitchellGraph
@@ -158,3 +160,5 @@ namespace Graph
         }
     }
 }
+
+#endif
