@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\Revch\\src\\data_structures\\graph\\graph.csproj": {}
+    "C:\\Users\\Revch\\src\\data_structures\\graph\\graph.csproj": {}
   },
   "projects": {
-    "c:\\Users\\Revch\\src\\data_structures\\graph\\graph.csproj": {
+    "C:\\Users\\Revch\\src\\data_structures\\graph\\graph.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\Revch\\src\\data_structures\\graph\\graph.csproj",
+        "projectUniqueName": "C:\\Users\\Revch\\src\\data_structures\\graph\\graph.csproj",
         "projectName": "graph",
-        "projectPath": "c:\\Users\\Revch\\src\\data_structures\\graph\\graph.csproj",
+        "projectPath": "C:\\Users\\Revch\\src\\data_structures\\graph\\graph.csproj",
         "packagesPath": "C:\\Users\\Revch\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\Revch\\src\\data_structures\\graph\\obj\\",
+        "outputPath": "C:\\Users\\Revch\\src\\data_structures\\graph\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Revch\\AppData\\Roaming\\NuGet\\NuGet.Config"

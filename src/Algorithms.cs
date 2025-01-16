@@ -1,164 +1,145 @@
-#if false
-
-using System.Numerics;
-
-namespace MitchellGraph
-{
-    public class Algorithms
-    {
-        private static void Dijkstra<T>(
-            Graph<T> g,
-            GraphNode<T> from,
-            GraphNode<T> to,
-            out Dictionary<GraphNode<T>, int> costs,
-            out Dictionary<GraphNode<T>, MitchellGraph.GraphNode<T>?> routes)
-        {
-            costs = new();
-            routes = new();
-
-            // create list of nodes to visit
-            List<GraphNode<T>> to_visit = new();
-
-            // initialize costs, routes, and to_visit
-            foreach (GraphNode<T> node in g)
-            {
-                if (node == from)
-                    costs[node] = 0;
-                else
-                    costs[node] = int.MaxValue;
-
-                routes[node] = null;
-
-                to_visit.Add(node);
-            }
-
-            while (to_visit.Count > 0)
-            {
-                // find the node in to_visit which has the least cost path from the start node
-                GraphNode<T> next = new();
-                {
-                    int min_cost = int.MaxValue;
-                    foreach (GraphNode<T> node in to_visit)
-                        if (costs[node] < min_cost)
-                        {
-                            min_cost = costs[node];
-                            next = node;
-                        }
-                }
-
-                foreach (GraphNode<T> neighbor in next.Neighbors)
-                {
-                    // if the path to neighbor through this node is less than that of the existing path
-                    int cost = costs[next] + next.GetCost(neighbor);
-                    if (cost < costs[neighbor])
-                    {
-                        // update the costs and routes tables
-                        costs[neighbor] = cost;
-                        routes[neighbor] = next;
-                    }
-                }
-
-                to_visit.Remove(next);
-            }
-
-            return;
-        }
-
-        private static void PrintGraph<T>(Graph<T> g)
-        {
-            Console.WriteLine("{0} Nodes", g.Count);
-
-            foreach (GraphNode<T> node in g)
-            {
-                Console.Write("{0}: {{ ", node.Value);
-                foreach (GraphNode<T> neighbor in node.Neighbors)
-                    Console.Write("({0} {1}), ", neighbor.Value, node.GetCost(neighbor));
-                Console.Write("}}\n");
-            }
-        }
-    }
-}
+using System;
 
 namespace Graph
 {
-    public class Algorithms
+    public class GraphAlgorithms
     {
-        public static void Dijkstra<TVertexData>
+        #nullable enable
+        public static void Dijkstra<V>
         (
-            Graph<TVertexData, int> g,
-            Vertex<TVertexData, int> from,
-            Vertex<TVertexData, int> to,
-            out Dictionary<Vertex<TVertexData, int>, int> costs,
-            out Dictionary<Vertex<TVertexData, int>, Vertex<TVertexData, int>?> routes
+            Graph<V, int> g,
+            V source,
+            out Dictionary<V, int> costs,
+            out Dictionary<V, V?> routes
         )
+            where V : struct
         {
             costs = new();
             routes = new();
 
-            // create list of nodes to visit
-            List<Vertex<TVertexData, int>> to_visit = new();
+            // create a queue of nodes to visit
+            MinPriorityQueue<V> to_visit = new();
 
             // initialize costs, routes, and to_visit
-            foreach (Vertex<TVertexData, int> v in g.Vertices)
+
+            foreach (V v in g.Vertices)
             {
-                if (v == from)
+                if (v.Equals(source))
                     costs[v] = 0;
                 else
                     costs[v] = int.MaxValue;
 
                 routes[v] = null;
 
-                to_visit.Add(v);
+                to_visit.Insert(v, costs[v]);
             }
 
             while (to_visit.Count > 0)
             {
                 // find the node in to_visit which has the least cost path from the start node
-                Vertex<TVertexData, int>? next = new();
-                {
-                    int min_cost = int.MaxValue;
-                    foreach (Vertex<TVertexData, int> v in to_visit)
-                        if (costs[v] < min_cost)
-                        {
-                            min_cost = costs[v];
-                            next = v;
-                        }
-                }
+                V next = to_visit.Extract();
 
-                if (next == null)
-                    throw new InvalidOperationException();
-
-                foreach (Vertex<TVertexData, int> neighbor in next.Neighbors)
+                foreach (V neighbor in g.GetNeighbors(next))
                 {
+                    int neighborCost = g.GetEdgeData(next, neighbor);
+
                     // if the path to neighbor through this node is less than that of the existing path
-                    int cost = costs[next] + g.GetEdge(next, neighbor).Data;
+                    int cost = costs[next] + neighborCost;
                     if (cost < costs[neighbor])
                     {
                         // update the costs and routes tables
+                        to_visit.Update(neighbor, cost);
                         costs[neighbor] = cost;
                         routes[neighbor] = next;
                     }
                 }
-
-                to_visit.Remove(next);
             }
 
             return;
         }
 
-        public static void PrintGraph<TVertexData, TEdgeData>(Graph<TVertexData, TEdgeData> g)
+        // uses Dijkstra's algorithm to find the shortest path from "from" to "to" on graph "graph"
+        #nullable enable
+        public static List<V> ShortestPath<V>(Graph<V, int> g, V from, V to)
+            where V : struct
         {
-            Console.WriteLine("{0} Vertices", g.Vertices.Length);
+            Dictionary<V, int> costs = new();
+            Dictionary<V, V?> routes = new();
 
-            foreach (var v in g.Vertices)
+            Dijkstra(g, from, out costs, out routes);
+
+            return ShortestPath(routes, to);
+        }
+
+        // finds the shortest path given the costs table generated by Dijkstra's algorithm
+        public static List<V> ShortestPath<V>(Dictionary<V, V?> routes, V to)
+            where V : struct
+        {
+            List<V> ret = new() {to};
+
+            V v = to;
+            while(routes[v] != null)
             {
-                Console.Write("{0}: {{ ", v.Data);
-                foreach (var neighbor in v.Neighbors)
-                    Console.Write("({0} {1}), ", neighbor.Data, g.GetEdge(v, neighbor).Data);
-                Console.Write("}}\n");
+                V next = routes[v].GetValueOrDefault();
+                ret.Add(next);
+                v = next;
             }
+
+            ret.Reverse();
+
+            return ret;
+        }
+
+        public static Graph<V, int> Prims<V>(Graph<V, int> g, V root)
+            where V : struct
+        {
+            Graph<V, int> minSpanTree = new();
+
+            Dictionary<V, int> costs = new();
+            Dictionary<V, V?> parents = new();
+            MinPriorityQueue<V> queue = new();
+
+            foreach (V v in g.Vertices)
+            {
+                minSpanTree.AddVertex(v);
+                queue.Insert(v, int.MaxValue);
+                costs[v] = int.MaxValue;
+                parents[v] = null;
+            }
+
+            queue.Update(root, 0);
+            costs[root] = 0;
+
+            while(queue.Count > 0)
+            {
+                V u = queue.Extract(); 
+                
+                if (parents[u] != null)
+                    minSpanTree.AddEdge(u, parents[u].GetValueOrDefault(), costs[u]);
+                
+                V[] neighbors = g.GetNeighbors(u);
+
+                foreach (V neighbor in neighbors)
+                {
+                    int cost = g.GetEdgeData(u, neighbor);
+
+                    if (queue.Elements.Contains(neighbor) && cost < costs[neighbor])
+                    {
+                        queue.Update(neighbor, cost);
+                        parents[neighbor] = u;
+                        costs[neighbor] = cost;
+                    }
+                }
+
+            }
+
+            return minSpanTree;
+        }
+
+        public static Graph<V, int> MST<V>(Graph<V, int> g, V root)
+            where V : struct
+        {
+            return Prims(g, root);
         }
     }
 }
-
-#endif
