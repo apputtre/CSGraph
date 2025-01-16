@@ -7,7 +7,7 @@ namespace Graph
         #nullable enable
         public static void Dijkstra<V>
         (
-            Graph<V, int> g,
+            WeightedGraph<int, V> g,
             V source,
             out Dictionary<V, int> costs,
             out Dictionary<V, V?> routes
@@ -60,7 +60,7 @@ namespace Graph
 
         // uses Dijkstra's algorithm to find the shortest path from "from" to "to" on graph "graph"
         #nullable enable
-        public static List<V> ShortestPath<V>(Graph<V, int> g, V from, V to)
+        public static List<V> ShortestPath<V>(WeightedGraph<int, V> g, V from, V to)
             where V : struct
         {
             Dictionary<V, int> costs = new();
@@ -90,10 +90,10 @@ namespace Graph
             return ret;
         }
 
-        public static Graph<V, int> Prims<V>(Graph<V, int> g, V root)
+        public static WeightedGraph<int, V> Prims<V>(WeightedGraph<int, V> g, V root)
             where V : struct
         {
-            Graph<V, int> minSpanTree = new();
+            WeightedGraph<int, V> minSpanTree = new();
 
             Dictionary<V, int> costs = new();
             Dictionary<V, V?> parents = new();
@@ -136,7 +136,7 @@ namespace Graph
             return minSpanTree;
         }
 
-        public static Graph<V, int> MST<V>(Graph<V, int> g, V root)
+        public static WeightedGraph<int, V> MST<V>(WeightedGraph<int, V> g, V root)
             where V : struct
         {
             return Prims(g, root);

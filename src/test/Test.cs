@@ -5,7 +5,7 @@ public static class Test
 {
     public static void Main()
     {
-Graph<char, int> graph = new();
+		WeightedGraph<int, char> graph = new();
 
 		graph.AddVertex('a');
 		graph.AddVertex('b');
@@ -52,7 +52,7 @@ Graph<char, int> graph = new();
 			Console.Write(c + ", ");
         Console.WriteLine($"\nCost of shortest path: {costs['e']}");
 
-		Graph<char, int> mst = GraphAlgorithms.Prims(graph, 'a');
+		WeightedGraph<int, char> mst = GraphAlgorithms.Prims(graph, 'a');
 
         Console.WriteLine("\nMST with 'a' as source vertex:");
 		foreach (Edge<char, int> e in mst.Edges)
