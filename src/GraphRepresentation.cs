@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Graph
 {
-    public abstract class GraphRepresentation
+    public interface IGraphRepresentation
     {
         public abstract IReadOnlyCollection<int> Vertices { get; }
         public abstract IReadOnlyCollection<Edge<int>> Edges { get; }
@@ -19,7 +19,7 @@ namespace Graph
         public abstract void Clear();
     }
 
-    public abstract class GraphRepresentation<V>
+    public interface IGraphRepresentation<V>
     {
         public abstract IReadOnlyCollection<int> Vertices { get; }
         public abstract IReadOnlyCollection<Edge<V>> Edges { get; }
@@ -39,7 +39,7 @@ namespace Graph
         public abstract void Clear();
     }
 
-    public abstract class WeightedGraphRepresentation<E>
+    public interface IWeightedGraphRepresentation<E>
     {
         public abstract IReadOnlyCollection<int> Vertices { get; }
         public abstract IReadOnlyCollection<Edge<int, E>> Edges { get; }
@@ -57,7 +57,7 @@ namespace Graph
         public abstract void Clear();
     }
 
-    public abstract class WeightedGraphRepresentation<E, V>
+    public interface IWeightedGraphRepresentation<E, V>
     {
         public abstract IReadOnlyCollection<int> Vertices { get; }
         public abstract IReadOnlyCollection<Edge<int, E>> Edges { get; }

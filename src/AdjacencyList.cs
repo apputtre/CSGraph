@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Graph
 {
+    /*
     public class WeightedAdjacencyList<E> : WeightedGraphRepresentation<E>
     {
         public override VertexSet Vertices {get => new VertexSet(this);}
@@ -72,7 +73,6 @@ namespace Graph
         }
 
         private List<Vertex?> vertices = new();
-        private PriorityQueue<int, int> freeIndices = new();
         private int numVertices = 0;
         private int numEdges = 0;
 
@@ -85,15 +85,8 @@ namespace Graph
         {
             int idx;
 
-            if (freeIndices.Count > 0)
-            {
-                idx = freeIndices.Dequeue();
-            }
-            else
-            {
-                vertices.Add(new());
-                idx = vertices.Count - 1;
-            }
+            vertices.Add(new());
+            idx = vertices.Count - 1;
 
             ++numVertices;
 
@@ -109,8 +102,12 @@ namespace Graph
                 GetVertex(n).RemoveConnection(vertex);
             
             vertices[vertex] = null;
-            freeIndices.Enqueue(vertex, vertex);
             --numVertices;
+
+            if (vertices.Count < 2 * (vertices.Count - numVertices))
+            {
+                // TODO: Reallocate
+            }
         }
 
         public override bool ContainsVertex(int vertex)
@@ -183,12 +180,15 @@ namespace Graph
         {
             foreach (Vertex v in vertices)
                 v.Neighbors.Clear();
+            
+            numEdges = 0;
         }
 
         public override void Clear()
         {
             vertices.Clear();
-            freeIndices.Clear();
+            numEdges = 0;
+            numVertices = 0;
         }
 
         public class VertexSet : IReadOnlyCollection<int>
@@ -333,7 +333,6 @@ namespace Graph
                 while(vertices.Count - 1 < idx)
                 {
                     vertices.Add(new());
-                    freeIndices.Enqueue(vertices.Count - 1, vertices.Count - 1);
                 }
 
                 vertices[vertices.Count - 1] = new();
@@ -350,11 +349,12 @@ namespace Graph
             return (Vertex) vertices[idx];
         }
     }
+    */
 
-    public class WeightedAdjacencyList<E, V> : WeightedGraphRepresentation<E, V>
+    public class WeightedAdjacencyList<E, V> : IWeightedGraphRepresentation<E, V>
     {
-        public override VertexSet Vertices {get => new VertexSet(this);}
-        public override EdgeSet Edges {get => new EdgeSet(this);}
+        public override IReadOnlyCollection<int> Vertices {get => new VertexSet(this);}
+        public override IReadOnlyCollection<Edge<int, E>> Edges {get => new EdgeSet(this);}
 
         public WeightedAdjacencyList() {}
 
@@ -424,7 +424,6 @@ namespace Graph
 
         private List<Vertex?> vertices = new();
         private Dictionary<V, int> indices = new();
-        private PriorityQueue<int, int> freeIndices = new();
         private int numVertices = 0;
         private int numEdges = 0;
 
@@ -444,16 +443,8 @@ namespace Graph
 
             int idx;
 
-            if (freeIndices.Count > 0)
-            {
-                idx = freeIndices.Dequeue();
-                vertices[idx] = new(vData);
-            }
-            else
-            {
-                vertices.Add(new(vData));
-                idx = vertices.Count - 1;
-            }
+            vertices.Add(new(vData));
+            idx = vertices.Count - 1;
 
             indices[vData] = idx;
             ++numVertices;
@@ -470,8 +461,12 @@ namespace Graph
                 GetVertex(n).RemoveConnection(vertex);
             
             vertices[vertex] = null;
-            freeIndices.Enqueue(vertex, vertex);
             --numVertices;
+
+            if (vertices.Count < 2 * (vertices.Count - numVertices))
+            {
+                // TODO: Reallocate
+            }
         }
 
         public override bool ContainsVertex(int vertex)
@@ -511,7 +506,7 @@ namespace Graph
             return GetVertex(from).IsConnected(to);
         }
 
-        public override void SetEdgeData(int from, int to, E data = default(E))
+        public override void SetEdgeData(int from, int to, E data = default)
         {
             Disconnect(from, to);
             Connect(from, to, data);
@@ -585,13 +580,17 @@ namespace Graph
         {
             foreach (Vertex v in vertices)
                 v.Neighbors.Clear();
+            
+            numEdges = 0;
         }
 
         public override void Clear()
         {
             vertices.Clear();
             indices.Clear();
-            freeIndices.Clear();
+
+            numVertices = 0;
+            numEdges = 0;
         }
 
         public class VertexSet : IReadOnlyCollection<int>
@@ -734,10 +733,7 @@ namespace Graph
             else
             {
                 while(vertices.Count - 1 < idx)
-                {
                     vertices.Add(new(vData));
-                    freeIndices.Enqueue(vertices.Count - 1, vertices.Count - 1);
-                }
 
                 vertices[vertices.Count - 1] = new(vData);
             }

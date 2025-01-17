@@ -148,7 +148,7 @@ namespace Graph
         public override IReadOnlyCollection<int> Vertices => new VertexSet(adj);
         public override IReadOnlyCollection<Edge<int, E>> Edges => new EdgeSet(adj);
 
-        private WeightedGraphRepresentation<E> adj;
+        private WeightedAdjacencyList<E> adj;
 
         public WeightedGraph(E defaultEdgeDataVal = default) : base(defaultEdgeDataVal)
         {
@@ -267,9 +267,9 @@ namespace Graph
         {
             public int Count => adj.Vertices.Count;
 
-            private WeightedGraphRepresentation<E> adj;
+            private WeightedAdjacencyList<E> adj;
 
-            public VertexSet(WeightedGraphRepresentation<E> adj)
+            public VertexSet(WeightedAdjacencyList<E> adj)
             {
                 this.adj = adj;
             }
@@ -289,12 +289,12 @@ namespace Graph
         {
             public int Current => set.Current;
 
-            private WeightedGraphRepresentation<E> adj;
+            private WeightedAdjacencyList<E> adj;
             private IEnumerator<int> set;
 
             object IEnumerator.Current => Current;
 
-            public VertexEnumerator(WeightedGraphRepresentation<E> adj)
+            public VertexEnumerator(WeightedAdjacencyList<E> adj)
             {
                 this.adj = adj;
                 this.set = adj.Vertices.GetEnumerator();
@@ -320,9 +320,9 @@ namespace Graph
         {
             public int Count => adj.Edges.Count / 2;
 
-            private WeightedGraphRepresentation<E> adj;
+            private WeightedAdjacencyList<E> adj;
 
-            public EdgeSet(WeightedGraphRepresentation<E> adj)
+            public EdgeSet(WeightedAdjacencyList<E> adj)
             {
                 this.adj = adj;
             }
@@ -348,10 +348,10 @@ namespace Graph
 
             object IEnumerator.Current => Current;
 
-            private WeightedGraphRepresentation<E> adj;
+            private WeightedAdjacencyList<E> adj;
             private IEnumerator<Edge<int, E>> set;
 
-            public EdgeEnumerator(WeightedGraphRepresentation<E> adj)
+            public EdgeEnumerator(WeightedAdjacencyList<E> adj)
             {
                 this.adj = adj;
                 set = adj.Edges.GetEnumerator();
@@ -387,6 +387,11 @@ namespace Graph
         }
     }
 
+    public class WeightedGraph : WeightedGraph<int>
+    {
+        public WeightedGraph(int defaultEdgeDataVal = 1): base(defaultEdgeDataVal) {}
+    }
+
     /*
     A weighted, undirected graph with each vertex having a unique
     label of type 'V' and each edge having associated data of type 'E'.
@@ -396,7 +401,7 @@ namespace Graph
         public override IReadOnlyCollection<V> Vertices => new VertexSet(adj);
         public override IReadOnlyCollection<Edge<V, E>> Edges => new EdgeSet(adj);
 
-        private WeightedGraphRepresentation<E, V> adj;
+        private IWeightedGraphRepresentation<E, V> adj;
 
         public WeightedGraph(E defaultEdgeDataVal = default) : base(defaultEdgeDataVal)
         {

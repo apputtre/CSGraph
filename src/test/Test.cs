@@ -1,11 +1,42 @@
 using System;
-using Graph;
+//using Graph;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
+
+public class A
+{
+	public static int x = 0;
+
+	public void Test()
+	{
+		++x;
+	}
+}
+
+public abstract class B
+{
+	public static int x = 0;
+
+	public void Test()
+	{
+		++x;
+	}
+}
+
+public class BDerived : B
+{
+    new public void Test()
+    {
+        ++x;
+    }
+}
 
 public static class Test
 {
     public static void Main()
     {
-		WeightedGraph<int, char> graph = new();
+		/*
+		WeightedGraph<int, char> graph = new(1);
 
 		graph.AddVertex('a');
 		graph.AddVertex('b');
@@ -57,5 +88,50 @@ public static class Test
         Console.WriteLine("\nMST with 'a' as source vertex:");
 		foreach (Edge<char, int> e in mst.Edges)
 			Console.WriteLine($"{e.From} => {e.To}, {e.Data}");
+		
+		WeightedGraph w = new();
+		int v1 = w.AddVertex();
+		int v2 = w.AddVertex();
+		w.AddEdge(v1, v2);
+		Console.WriteLine(w.GetEdgeData(v1, v2));
+		w.SetEdgeData(v1, v2, 10);
+		Console.WriteLine(w.GetEdgeData(v1, v2));
+		Console.WriteLine(w.GetEdgeData(v2, v1));
+		Console.WriteLine(v1 + " " + v2);
+		*/
+
+/*
+		WeightedGraph<int> wgraph = new();
+
+		int v1 = wgraph.AddVertex();
+		int v2 = wgraph.AddVertex();
+		int v3 = wgraph.AddVertex();
+		wgraph.AddEdge(v1, v2, 10);
+		wgraph.AddEdge(v1, v3);
+		wgraph.SetEdgeData(v1, v2, 42);
+		Console.WriteLine(wgraph.GetEdgeData(v1, v2));
+
+		foreach (Edge<int, int> e in wgraph.Edges)
+			Console.WriteLine($"{e.From} => {e.To}, {e.Data}");
+			*/
+		
+		/*
+		A a = new();
+		B b = new BDerived();
+		Stopwatch s = new();
+		s.Start();
+		for(int i = 0; i < 1000000000; ++i)
+			a.Test();
+		s.Stop();
+		Console.WriteLine(s.ElapsedMilliseconds);
+		s.Reset();
+
+		s.Start();
+		for(int i = 0; i < 1000000000; ++i)
+			b.Test();
+		s.Stop();
+		Console.WriteLine(s.ElapsedMilliseconds);
+
+*/
     }
 }
