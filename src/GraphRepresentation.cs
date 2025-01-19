@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+#if false
 
 namespace Graph
 {
@@ -52,7 +51,7 @@ namespace Graph
         public abstract E GetEdgeData(int v1, int v2);
         public abstract bool ContainsVertex(int v);
         public abstract bool ContainsConnection(int v1, int v2);
-        public abstract int[] GetNeighbors(int idx);
+        public abstract int[] GetConnected(int idx);
         public abstract void ClearEdges();
         public abstract void Clear();
     }
@@ -79,3 +78,5 @@ namespace Graph
         public abstract void Clear();
     }
 }
+
+#endif

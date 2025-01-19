@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+#if false
 namespace Graph
 {
     /*
@@ -353,8 +354,8 @@ namespace Graph
 
     public class WeightedAdjacencyList<E, V> : IWeightedGraphRepresentation<E, V>
     {
-        public override IReadOnlyCollection<int> Vertices {get => new VertexSet(this);}
-        public override IReadOnlyCollection<Edge<int, E>> Edges {get => new EdgeSet(this);}
+        public IReadOnlyCollection<int> Vertices {get => new VertexSet(this);}
+        public IReadOnlyCollection<Edge<int, E>> Edges {get => new EdgeSet(this);}
 
         public WeightedAdjacencyList() {}
 
@@ -436,7 +437,7 @@ namespace Graph
                 Connect(edge.From, edge.To, edge.Data);
         }
 
-        public override int AddVertex(V vData)
+        public int AddVertex(V vData)
         {
             if (TryGetIndex(vData, out int i))
                 throw new Exception("Duplicate vertex");
@@ -452,7 +453,7 @@ namespace Graph
             return idx;
         }
 
-        public override void RemoveVertex(int vertex)
+        public void RemoveVertex(int vertex)
         {
             if (!ContainsVertex(vertex))
                 throw new Exception("Nonexistant vertex");
@@ -469,12 +470,12 @@ namespace Graph
             }
         }
 
-        public override bool ContainsVertex(int vertex)
+        public bool ContainsVertex(int vertex)
         {
             return vertex >= 0 && vertex < vertices.Count && vertices[vertex] != null;
         }
 
-        public override void Connect(int from, int to, E data = default(E))
+        public void Connect(int from, int to, E data = default)
         {
             Vertex vFrom = GetVertex(from);
 
@@ -489,7 +490,7 @@ namespace Graph
             ++numEdges;
         }
 
-        public override void Disconnect(int from, int to)
+        public void Disconnect(int from, int to)
         {
             if (!ContainsConnection(from, to))
                 throw new Exception("Nonexistant edge");
@@ -498,7 +499,7 @@ namespace Graph
             --numEdges;
         }
 
-        public override bool ContainsConnection(int from, int to)
+        public bool ContainsConnection(int from, int to)
         {
             if (!ContainsVertex(from) || !ContainsVertex(to))
                 throw new Exception("Nonexistant vertex");
@@ -506,13 +507,13 @@ namespace Graph
             return GetVertex(from).IsConnected(to);
         }
 
-        public override void SetEdgeData(int from, int to, E data = default)
+        public void SetEdgeData(int from, int to, E data = default)
         {
             Disconnect(from, to);
             Connect(from, to, data);
         }
 
-        public override E GetEdgeData(int from, int to)
+        public E GetEdgeData(int from, int to)
         {
             if (!ContainsConnection(from, to))
                 throw new Exception("Nonexistant edge");
@@ -520,7 +521,7 @@ namespace Graph
             return GetVertex(from).GetConnection(to).Data;
         }
 
-        public override void SetVertexData(int vertex, V data)
+        public void SetVertexData(int vertex, V data)
         {
             if (!ContainsVertex(vertex))
                 throw new Exception("Nonexistant vertex");
@@ -533,7 +534,7 @@ namespace Graph
             vertices[vertex] = new Vertex(data, existingVertex.Neighbors);
         }
 
-        public override V GetVertexData(int vertex)
+        public V GetVertexData(int vertex)
         {
             if (!ContainsVertex(vertex))
                 throw new Exception("Nonexistant vertex");
@@ -541,7 +542,7 @@ namespace Graph
             return GetVertex(vertex).VertexData;
         }
 
-        public override int[] GetNeighbors(int vertex)
+        public int[] GetNeighbors(int vertex)
         {
             if (!ContainsVertex(vertex))
                 throw new Exception("Nonexistant vertex");
@@ -556,7 +557,7 @@ namespace Graph
             return neighbors;
         }
 
-        public override bool TryGetIndex(V vData, out int idx)
+        public bool TryGetIndex(V vData, out int idx)
         {
             if (!indices.TryGetValue(vData, out idx))
                 return false;
@@ -567,7 +568,7 @@ namespace Graph
             return true;
         }
 
-        public override int GetIndex(V vData)
+        public int GetIndex(V vData)
         {
             int idx;
             if (!indices.TryGetValue(vData, out idx))
@@ -576,7 +577,7 @@ namespace Graph
             return idx;
         }
 
-        public override void ClearEdges()
+        public void ClearEdges()
         {
             foreach (Vertex v in vertices)
                 v.Neighbors.Clear();
@@ -584,7 +585,7 @@ namespace Graph
             numEdges = 0;
         }
 
-        public override void Clear()
+        public void Clear()
         {
             vertices.Clear();
             indices.Clear();
@@ -750,3 +751,5 @@ namespace Graph
         }
     }
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if false
+
 using System;
 
 namespace Graph
@@ -130,7 +132,6 @@ namespace Graph
                         costs[neighbor] = cost;
                     }
                 }
-
             }
 
             return minSpanTree;
@@ -143,3 +144,5 @@ namespace Graph
         }
     }
 }
+
+#endif

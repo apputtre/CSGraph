@@ -1,83 +1,44 @@
 using System.Collections.Generic;
 using System.Collections;
-using Graph.Implementation;
+using CSGraph.Implementation;
 
-namespace Graph.Implementation
+namespace CSGraph.Implementation
 {
-    public class Vertex<TConnection>
-        where TConnection : Connection, new()
+    public interface IVertex<TConnection>
     {
-        public List<TConnection> Neighbors {get;}
+        public List<TConnection> Connections {get;}
+    }
+
+    public readonly struct Vertex<TConnection> : IVertex<TConnection>
+    {
+        public List<TConnection> Connections {get;}
 
         public Vertex()
         {
-            Neighbors = new();
-        }
-
-        public Vertex(List<TConnection> neighbors)
-        {
-            Neighbors = neighbors;
-        }
-
-        public void RemoveConnection(int vertex)
-        {
-            Neighbors.RemoveAt(Neighbors.FindIndex(c => c.To == vertex));
-        }
-
-        public TConnection GetConnection(int vertex)
-        {
-            int idx = Neighbors.FindIndex(c => c.To == vertex);
-
-            if (idx == -1)
-                throw new Exception("Nonexistant connection");
-            
-            return Neighbors[idx];
-        }
-
-        public bool TryGetConnection(int vertex, out TConnection connection)
-        {
-            int idx = Neighbors.FindIndex(c => c.To == vertex);
-            if (idx == -1)
-            {
-                connection = new();
-                return false;
-            }
-
-            connection = Neighbors[idx];
-
-            return true;
-        }
-
-        public bool IsConnected(int vertex)
-        {
-            return Neighbors.FindIndex(c => c.To == vertex) != -1;
+            Connections = new();
         }
     }
 
-    public class Vertex<V, TConnection> : Vertex<TConnection>
-        where TConnection : Connection, new()
+    public readonly struct Vertex<VData, TConnection> : IVertex<TConnection>
     {
-        public V Data {get; set;}
+        public List<TConnection> Connections {get;}
+        public VData Data {get;}
 
-        public Vertex() : base()
-        {
-            Data = default;
-        }
-
-        public Vertex(V data, List<TConnection> neighbors) : base(neighbors)
+        public Vertex(VData data)
         {
             Data = data;
+            Connections = new();
         }
     }
 
-    public class Connection
+    public interface IConnection
     {
-        public int To {get; set;}
+        public int To {get;}
+    }
 
-        public Connection()
-        {
-            To = default;
-        }
+    public readonly struct Connection : IConnection
+    {
+        public int To {get;}
 
         public Connection(int to)
         {
@@ -85,21 +46,20 @@ namespace Graph.Implementation
         }
     }
 
-    public class Connection<E> : Connection
+    public readonly struct Connection<EData> : IConnection
     {
-        public E Data {get; set;}
+        public int To{get;}
 
-        public Connection() : base()
-        {
-            Data = default;
-        }
+        public EData Data {get;}
 
-        public Connection(int to, E data) : base(to)
+        public Connection(int to, EData data)
         {
+            To = to;
             Data = data;
         }
     }
 
+/*
     public abstract class EdgeEnumeratorImp<TVertex, TConnection, TEdge> : IEnumerator<TEdge>
         where TVertex : Vertex<TConnection>
         where TConnection : Connection, new()
@@ -156,131 +116,22 @@ namespace Graph.Implementation
             vEnum.Dispose();
         }
     }
+    */
 
-    public class AdjacencyListImp<TVertex, TConnection>
-        where TVertex : Vertex<TConnection>, new()
-        where TConnection : Connection, new()
+    public class AdjacencyList<TVertex, TConnection>
+        where TVertex : struct, IVertex<TConnection>
+        where TConnection : struct, IConnection
     {
-        public IReadOnlyCollection<int> Vertices {get => new VertexSet(vertices, numVertices);}
-        public IReadOnlyCollection<Edge<int>> Edges {get => new EdgeSet(vertices, Vertices.GetEnumerator(), numVertices);}
+        public List<TVertex?> Vertices {get;}
 
-        public AdjacencyListImp() {}
-
-        protected List<TVertex?> vertices = new();
-        protected int numVertices = 0;
-        protected int numEdges = 0;
-
-        public int AddVertex()
+        public AdjacencyList()
         {
-            int idx;
-
-            vertices.Add(new());
-            idx = vertices.Count - 1;
-
-            ++numVertices;
-
-            return idx;
+            Vertices = new();
         }
 
-        public void RemoveVertex(int vertex)
+    /*
+        public class VertexSet : IEnumerator<int>
         {
-            if (!ContainsVertex(vertex))
-                throw new Exception("Nonexistant vertex");
-            
-            foreach (int n in GetNeighbors(vertex))
-                GetVertex(n).RemoveConnection(vertex);
-            
-            vertices[vertex] = null;
-            --numVertices;
-
-            if (vertices.Count < 2 * (vertices.Count - numVertices))
-            {
-                // TODO: Reallocate
-            }
-        }
-
-        public bool ContainsVertex(int vertex)
-        {
-            return vertex >= 0 && vertex < vertices.Count && vertices[vertex] != null;
-        }
-
-        public void Connect(int from, int to)
-        {
-            TVertex vFrom = GetVertex(from);
-
-            if (vFrom.TryGetConnection(to, out TConnection existingConnection))
-            {
-                vFrom.RemoveConnection(existingConnection.To);
-
-                TConnection connection = new();
-                connection.To = to;
-
-                vFrom.Neighbors.Add(connection);
-            }
-            else
-            {
-                TConnection connection = new();
-                connection.To = to;
-
-                vFrom.Neighbors.Add(connection);
-            }
-            
-            ++numEdges;
-        }
-
-        public void Disconnect(int from, int to)
-        {
-            if (!ContainsConnection(from, to))
-                throw new Exception("Nonexistant edge");
-            
-            GetVertex(from).RemoveConnection(to);
-            --numEdges;
-        }
-
-        public bool ContainsConnection(int from, int to)
-        {
-            if (!ContainsVertex(from) || !ContainsVertex(to))
-                throw new Exception("Nonexistant vertex");
-            
-            return GetVertex(from).IsConnected(to);
-        }
-
-        public int[] GetNeighbors(int vertex)
-        {
-            if (!ContainsVertex(vertex))
-                throw new Exception("Nonexistant vertex");
-            
-            TVertex v = GetVertex(vertex);
-            
-            int[] neighbors = new int[v.Neighbors.Count];
-
-            for(int i = 0; i < v.Neighbors.Count; ++i)
-                neighbors [i] = v.Neighbors[i].To;
-
-            return neighbors;
-        }
-
-        public void ClearEdges()
-        {
-            foreach (TVertex v in vertices)
-                v.Neighbors.Clear();
-            
-            numEdges = 0;
-        }
-
-        public void Clear()
-        {
-            vertices.Clear();
-
-            numVertices = 0;
-            numEdges = 0;
-        }
-
-        public class VertexSet : IReadOnlyCollection<int>
-        {
-            public int Count => numVertices;
-
-            private int numVertices;
             private List<TVertex?> vertices;
 
             public VertexSet(List<TVertex?> vertices, int numVertices)
@@ -370,39 +221,42 @@ namespace Graph.Implementation
                 Console.WriteLine(1);
             }
         }
+        */
 
-        private void NewVertex(int idx)
+        public void Trim()
         {
-            if (idx < vertices.Count - 1)
-                vertices[idx] = new();
-            else
-            {
-                while(vertices.Count - 1 < idx)
-                    vertices.Add(new());
+            List<int> nullIndices = new();
 
-                vertices[vertices.Count - 1] = new();
+            for (int vertex = 0; vertex < Vertices.Count; ++vertex)
+            {
+                if (Vertices[vertex] == null)
+                {
+                    nullIndices.Add(vertex);
+                    continue;
+                }
+
+                TVertex v = Vertices[vertex].GetValueOrDefault();
+
+                for (int c = 0; c < v.Connections.Count; ++c)
+                {
+                    if (Vertices[v.Connections[c].To] == null)
+                    {
+                        v.Connections[c] = v.Connections[^1];
+                        v.Connections.RemoveAt(v.Connections.Count - 1);
+                    }
+                }
             }
 
-            ++numVertices;
-        }
-
-        protected TVertex GetVertex(int idx)
-        {
-            if (!ContainsVertex(idx))
-                throw new Exception("Nonexistant vertex");
-            
-            return vertices[idx];
-        }
-
-        protected TConnection GetConnection(int from, int to)
-        {
-            if (!ContainsConnection(from, to))
-                throw new Exception("Nonexistant connection");
-            
-            return vertices[from].Neighbors.Find(c => c.To == to);
+            for (int j = 0; j < nullIndices.Count; ++j)
+            {
+                Vertices[j] = Vertices[^1];
+                Vertices.RemoveAt(Vertices.Count - 1);
+            }
         }
     }
 }
+
+#if false
 
 namespace Graph
 {
@@ -485,3 +339,5 @@ namespace Graph
 
     public class WeightedAdjacencyList : WeightedAdjacencyList<int> {}
 }
+
+#endif
