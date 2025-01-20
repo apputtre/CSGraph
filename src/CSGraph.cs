@@ -39,6 +39,7 @@ namespace CSGraph
         public abstract void RemoveEdge(int from, int to);
         public abstract Edge<int>[] GetEdges(int vertex);
         public abstract int[] GetNeighbors(int vertex);
+        public void Clear();
     }
 
     public interface IWeightedGraph<E>
@@ -59,6 +60,7 @@ namespace CSGraph
         public abstract void AddEdge(int from, int to, E? eData);
         public abstract void SetEdgeData(int from, int to, E? data);
         public abstract E? GetEdgeData(int from, int to);
+        public void Clear();
     }
 
     public interface IGraph<V>
@@ -74,6 +76,7 @@ namespace CSGraph
         public abstract void RemoveEdge(V from, V to);
         public abstract Edge<V>[] GetEdges(V vertex);
         public abstract V[] GetNeighbors(V vertex);
+        public void Clear();
     }
 
     public interface IWeightedGraph<E, V>
@@ -94,5 +97,6 @@ namespace CSGraph
         public abstract void AddEdge(V from, V to);
         public abstract E? GetEdgeData(V from, V to);
         public abstract void SetEdgeData(V from, V to, E data);
+        public void Clear();
     }
 }

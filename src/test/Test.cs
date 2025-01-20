@@ -41,8 +41,6 @@ public static class Test
 
 		graph.AddEdge('h', 'i', 7);
 
-		graph.RemoveVertex('d');
-
         System.Console.WriteLine("Graph:");
 		foreach (Edge<char, int> edge in graph.Edges)
 			Console.WriteLine($"{edge.From} => {edge.To}, {edge.Data}");

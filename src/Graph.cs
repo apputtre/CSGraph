@@ -435,6 +435,12 @@ namespace CSGraph.Implementation
             return vertex >= 0 && vertex < adj.Vertices.Count;
         }
 
+        public virtual void Clear()
+        {
+            adj.Vertices.Clear();
+            numConnections = 0;
+        }
+
         public class IndexSet : IReadOnlyCollection<int>
         {
             protected AdjacencyList<TVertex, TConnection> adj;
@@ -682,6 +688,12 @@ namespace CSGraph.Implementation
             bool found = TryGetConnectionByIndex(fromIdx, toIdx, out TConnection c);
             connection = c;
             return found;
+        }
+
+        public override void Clear()
+        {
+            base.Clear();
+            indices.Clear();
         }
 
         public class VertexSet : IReadOnlyCollection<V>
