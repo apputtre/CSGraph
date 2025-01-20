@@ -1,189 +1,326 @@
-using System.Collections.Generic;
 using System.Collections;
 using CSGraph.Implementation;
 
 namespace CSGraph
 {
-    public readonly struct Edge<V>
+    public class Graph : GraphImpl<Vertex<Connection>, Connection, Edge<int>>, IGraph
     {
-        public readonly V From {get;}
-        public readonly V To {get;}
+        public Graph() {}
 
-        public Edge(V from, V to)
+        public int AddVertex()
         {
-            From = from;
-            To = to;
+            return AddVertexImpl(new());
+        }
+
+        public void RemoveVertex(int vertex)
+        {
+            RemoveVertexByIndex(vertex);
+        }
+
+        public void AddEdge(int fromIdx, int toIdx)
+        {
+            AddConnection(fromIdx, new(toIdx));
+            AddConnection(toIdx, new(fromIdx));
+        }
+
+        public bool ContainsVertex(int vertex)
+        {
+            return ContainsVertexByIndex(vertex);
+        }
+
+        public bool ContainsEdge(int from, int to)
+        {
+            return TryGetConnectionByIndex(from, to, out var connection);
+        }
+
+        public Edge<int>[] GetEdges(int vertex)
+        {
+            return Array.ConvertAll(GetNeighbors(vertex), idx => new Edge<int>(vertex, idx)).ToArray();
+        }
+
+        public int[] GetNeighbors(int vertex)
+        {
+            return GetNeighborsByIndex(vertex);
+        }
+
+        public void RemoveEdge(int from, int to)
+        {
+            RemoveEdgeByIndex(from, to);
+        }
+
+        protected override Edge<int> GetEdge(int fromIdx, int toIdx)
+        {
+            if (!ContainsEdge(fromIdx, toIdx))
+                throw new Exception("Nonexistant edge");
+            
+            return new Edge<int>(fromIdx, toIdx);
         }
     }
 
-    public readonly struct Edge<V, E>
+    public class WeightedGraph<E> : GraphImpl<Vertex<Connection<E>>, Connection<E>, Edge<int, E?>>, IWeightedGraph<E>
     {
-        public readonly V From {get;}
-        public readonly V To {get;}
-        public readonly E Data {get;}
+        public E? DefaultEdgeDataValue {get; set;}
 
-        public Edge(V from, V to, E data = default)
+        public WeightedGraph()
         {
-            From = from;
-            To = to;
-            Data = data;
+            DefaultEdgeDataValue = default;
+        }
+
+        public void AddEdge(int from, int to, E? eData)
+        {
+            AddConnection(from, new(to, eData));
+            AddConnection(to, new(from, eData));
+        }
+
+        public void AddEdge(int from, int to)
+        {
+            AddEdge(from, to, DefaultEdgeDataValue);
+        }
+
+        public int AddVertex()
+        {
+            return AddVertexImpl(new());
+        }
+
+        public void RemoveVertex(int vertex)
+        {
+            RemoveVertexByIndex(vertex);
+        }
+
+        public bool ContainsEdge(int from, int to)
+        {
+            return TryGetConnectionByIndex(from, to, out var connection);
+        }
+
+        public bool ContainsVertex(int vertex)
+        {
+            return ContainsVertexByIndex(vertex);
+        }
+
+        public E? GetEdgeData(int from, int to)
+        {
+            if (!TryGetConnectionByIndex(from, to, out Connection<E> c))
+                throw new Exception("Nonexistant edge");
+            
+            return c.Data;
+        }
+
+        public Edge<int>[] GetEdges(int vertex)
+        {
+            return Array.ConvertAll(GetNeighbors(vertex), idx => new Edge<int>(vertex, idx)).ToArray();
+        }
+
+        public int[] GetNeighbors(int vertex)
+        {
+            return GetNeighborsByIndex(vertex);
+        }
+
+        public void RemoveEdge(int from, int to)
+        {
+            RemoveEdgeByIndex(from, to);
+        }
+
+        public void SetEdgeData(int from, int to, E? data)
+        {
+            RemoveEdgeByIndex(from, to);
+            AddConnection(from, new Connection<E>(to, data));
+            AddConnection(to, new Connection<E>(from, data));
+        }
+
+        protected override Edge<int, E?> GetEdge(int fromIdx, int toIdx)
+        {
+            if (!TryGetConnectionByIndex(fromIdx, toIdx, out var connection))
+                throw new Exception("Nonexistant edge");
+            
+            return new Edge<int, E?>(fromIdx, toIdx, connection.Data);
         }
     }
 
-    public interface IGraph
+    public class Graph<V> : GraphImpl<V, Vertex<V, Connection>, Connection, Edge<V>>, IGraph<V>
+        where V : notnull
     {
-        public abstract IReadOnlyCollection<int> Vertices {get;}
-        public abstract IReadOnlyCollection<Edge<int>> Edges {get;}
+        public void AddVertex(V vData)
+        {
+            AddVertexImpl(new Vertex<V, Connection>(vData));
+        }
 
-        public abstract int AddVertex();
-        public abstract bool ContainsVertex(int vertex);
-        public abstract void RemoveVertex(int vertex);
-        public abstract bool ContainsEdge(int from, int to);
-        public abstract void AddEdge(int from, int to);
-        public abstract void RemoveEdge(int from, int to);
-        public abstract Edge<int>[] GetEdges(int vertex);
-        public abstract int[] GetNeighbors(int vertex);
+        public void AddEdge(V from, V to)
+        {
+            if (!TryGetVertexByData(from, out var fromVertex) || !TryGetVertexByData(to, out var toVertex))
+                throw new Exception("Nonexistant vertex");
+            
+            TryGetIndexByData(from, out int fromIdx);
+            TryGetIndexByData(to, out int toIdx);
+            
+            AddConnection(fromIdx, new Connection(toIdx));
+            AddConnection(toIdx, new Connection(fromIdx));
+        }
+
+        public bool ContainsVertex(V vData)
+        {
+            return ContainsVertexByData(vData);
+        }
+
+        public void RemoveVertex(V vertex)
+        {
+            RemoveVertexByData(vertex);
+        }
+
+        public bool ContainsEdge(V from, V to)
+        {
+            return TryGetConnectionByData(from, to, out Connection c);
+        }
+
+        public V[] GetNeighbors(V vData)
+        {
+            return GetNeighborsByData(vData);
+        }
+
+        public Edge<V>[] GetEdges(V vertex)
+        {
+            return GetEdgesByData(vertex);
+        }
+
+        public void RemoveEdge(V from, V to)
+        {
+            RemoveEdgeByData(from, to);
+        }
+
+        protected override Edge<V> GetEdge(int fromIdx, int toIdx)
+        {
+            if (!TryGetConnectionByIndex(fromIdx, toIdx, out var connection))
+                throw new Exception("Nonexistant edge");
+            
+            V vData1 = adj.Vertices[fromIdx].Data;
+            V vData2 = adj.Vertices[toIdx].Data;
+            
+            return new Edge<V>(vData1, vData2);
+        }
     }
 
-    public interface IWeightedGraph<E>
+    public class WeightedGraph<E, V> : GraphImpl<V, Vertex<V, Connection<E>>, Connection<E>, Edge<V, E>>, IWeightedGraph<E, V>
+        where V : notnull
     {
-        public abstract IReadOnlyCollection<int> Vertices {get;}
-        public abstract IReadOnlyCollection<Edge<int, E>> Edges {get;}
+        public E? DefaultEdgeDataValue {get; set;}
 
-        public abstract int AddVertex();
-        public abstract bool ContainsVertex(int vertex);
-        public abstract void RemoveVertex(int vertex);
-        public abstract bool ContainsEdge(int from, int to);
-        public abstract void AddEdge(int from, int to);
-        public abstract void RemoveEdge(int from, int to);
-        public abstract Edge<int>[] GetEdges(int vertex);
-        public abstract int[] GetNeighbors(int vertex);
-        public abstract void AddEdge(int from, int to, E eData);
-        public abstract void SetEdgeData(int from, int to, E data);
-        public abstract E GetEdgeData(int from, int to);
+        public WeightedGraph()
+        {
+            DefaultEdgeDataValue = default;
+        }
+
+        public void AddVertex(V vData)
+        {
+            AddVertexImpl(new Vertex<V, Connection<E>>(vData));
+        }
+
+        public void AddEdge(V from, V to, E? eData)
+        {
+            if (!TryGetVertexByData(from, out var fromVertex) || !TryGetVertexByData(to, out var toVertex))
+                throw new Exception("Nonexistant vertex");
+            
+            TryGetIndexByData(from, out int fromIdx);
+            TryGetIndexByData(to, out int toIdx);
+            
+            AddConnection(fromIdx, new Connection<E>(toIdx, eData));
+            AddConnection(toIdx, new Connection<E>(fromIdx, eData));
+        }
+
+        public void AddEdge(V from, V to)
+        {
+            AddEdge(from, to, DefaultEdgeDataValue);
+        }
+
+        public bool ContainsVertex(V vData)
+        {
+            return ContainsVertexByData(vData);
+        }
+
+        public bool ContainsEdge(V from, V to)
+        {
+            return TryGetConnectionByData(from, to, out Connection<E> c);
+        }
+
+        public V[] GetNeighbors(V vData)
+        {
+            return GetNeighborsByData(vData);
+        }
+
+        public Edge<V>[] GetEdges(V vertex)
+        {
+            return GetEdgesByData(vertex);
+        }
+
+        public E? GetEdgeData(V from, V to)
+        {
+            if (!TryGetConnectionByData(from, to, out Connection<E> c))
+                throw new Exception("Nonexistant edge");
+            
+            return c.Data;
+        }
+
+        public void SetEdgeData(V from, V to, E? data)
+        {
+            if (!TryGetIndexByData(from, out var fromIdx) || !TryGetIndexByData(to, out var toIdx))
+                throw new Exception("Nonexistant vertex");
+
+            RemoveEdge(from, to);
+            AddConnection(fromIdx, new Connection<E>(toIdx, data));
+            AddConnection(toIdx, new Connection<E>(fromIdx, data));
+        }
+
+        public void RemoveEdge(V from, V to)
+        {
+            RemoveEdgeByData(from, to);
+        }
+
+        public void RemoveVertex(V vertex)
+        {
+            RemoveVertexByData(vertex);
+        }
+
+        protected override Edge<V, E> GetEdge(int fromIdx, int toIdx)
+        {
+            if (!TryGetConnectionByIndex(fromIdx, toIdx, out var connection))
+                throw new Exception("Nonexistant edge");
+            
+            V vData1 = adj.Vertices[fromIdx].Data;
+            V vData2 = adj.Vertices[toIdx].Data;
+            
+            return new Edge<V, E>(vData1, vData2, connection.Data);
+        }
     }
+}
 
-    public interface IGraph<V>
-    {
-        public abstract IReadOnlyCollection<V> Vertices {get;}
-        public abstract IReadOnlyCollection<Edge<V>> Edges {get;}
-
-        public abstract void AddVertex(V vData);
-        public abstract bool ContainsVertex(V vertex);
-        public abstract void RemoveVertex(V vertex);
-        public abstract bool ContainsEdge(V from, V to);
-        public abstract void AddEdge(V from, V to);
-        public abstract void RemoveEdge(V from, V to);
-        public abstract Edge<V>[] GetEdges(V vertex);
-        public abstract V[] GetNeighbors(V vertex);
-    }
-
-    public interface IWeightedGraph<E, V>
-    {
-        public abstract IReadOnlyCollection<V> Vertices {get;}
-        public abstract IReadOnlyCollection<Edge<V, E>> Edges {get;}
-
-        public abstract void AddVertex(V vData);
-        public abstract bool ContainsVertex(V vertex);
-        public abstract void RemoveVertex(V vertex);
-        public abstract bool ContainsEdge(V from, V to);
-        public abstract void RemoveEdge(V from, V to);
-        public abstract Edge<V>[] GetEdges(V vertex);
-        public abstract V[] GetNeighbors(V vertex);
-        public abstract void AddEdge(V from, V to, E eData);
-        public abstract void AddEdge(V from, V to);
-        public abstract E GetEdgeData(V from, V to);
-        public abstract void SetEdgeData(V from, V to, E data);
-    }
-
-    public abstract class GraphImpl<TVertex, TConnection>
+namespace CSGraph.Implementation
+{
+    public abstract class GraphImpl<TVertex, TConnection, TEdge>
         where TVertex : struct, IVertex<TConnection>
         where TConnection : struct, IConnection
     {
+        public IReadOnlyCollection<int> Vertices => new IndexSet(adj);
+        public IReadOnlyCollection<TEdge> Edges => new EdgeSet(this);
+
         protected AdjacencyList<TVertex, TConnection> adj = new();
-        protected int numVertices = 0;
+        protected int numConnections = 0;
 
-        protected virtual int CreateVertex(TVertex vertex)
-        {
-            adj.Vertices.Add(vertex);
-            ++numVertices;
-            return adj.Vertices.Count - 1;
-        }
+        protected abstract TEdge GetEdge(int fromIdx, int toIdx);
 
-        protected void CreateConnection(int fromIdx, TConnection connection)
-        {
-            if (!TryGetVertex(fromIdx, out var fromVertex))
-                throw new Exception("Nonexistant vertex");
-            
-            fromVertex.Connections.Add(connection);
-        }
-
-        protected void RemoveEdgeImpl(int from, int to)
-        {
-            if (!TryGetConnection(from, to, out TConnection c1) || !TryGetConnection(to, from, out TConnection c2))
-                throw new Exception("Nonexistant edge");
-            
-            TryGetVertex(from, out var v1);
-            TryGetVertex(to, out var v2);
-
-            int idx = v1.Connections.FindIndex(c => c.To == to);
-            v1.Connections[idx] = v1.Connections[^1];
-            v1.Connections.RemoveAt(v1.Connections.Count - 1);
-
-            idx = v2.Connections.FindIndex(c => c.To == from);
-            v2.Connections[idx] = v2.Connections[^1];
-            v2.Connections.RemoveAt(v2.Connections.Count - 1);
-        }
-
-        protected int[] GetNeighborsImpl(int vertex)
-        {
-            if (!TryGetVertex(vertex, out var v))
-                throw new Exception("Nonexistant vertex");
-            
-            List<int> neighbors = new();
-
-            foreach (TConnection c in v.Connections)
-                if (!ContainsVertexImpl(c.To))
-                    continue;
-                else
-                    neighbors.Add(c.To);
-
-            return neighbors.ToArray();
-        }
-
-        protected void RemoveVertexImpl(int vertex)
-        {
-            if (!ContainsVertexImpl(vertex))
-                throw new Exception("Nonexistant vertex");
-
-            adj.Vertices[vertex] = null;
-            --numVertices;
-
-            if ((adj.Vertices.Count - numVertices) > 2 * numVertices)
-                adj.Trim();
-        }
-
-        protected virtual bool TryGetVertex(int idx, out TVertex vertex)
+        protected virtual bool TryGetVertexByIndex(int idx, out TVertex vertex)
         {
             vertex = new();
 
-            if (!ContainsVertexImpl(idx))
+            if (!ContainsVertexByIndex(idx))
                 return false;
             
-            vertex = adj.Vertices[idx].GetValueOrDefault();
+            vertex = adj.Vertices[idx];
             return true;
         }
 
-        protected virtual bool ContainsVertexImpl(int vertex)
-        {
-            return vertex >= 0 && vertex < adj.Vertices.Count && adj.Vertices[vertex] != null;
-        }
-
-        protected virtual bool TryGetConnection(int fromIdx, int toIdx, out TConnection connection)
+        protected virtual bool TryGetConnectionByIndex(int fromIdx, int toIdx, out TConnection connection)
         {
             connection = new();
 
-            if (!TryGetVertex(fromIdx, out TVertex fromVertex) || !TryGetVertex(toIdx, out TVertex toVertex))
+            if (!TryGetVertexByIndex(fromIdx, out TVertex fromVertex) || !TryGetVertexByIndex(toIdx, out TVertex toVertex))
                 return false;
             
             int idx = fromVertex.Connections.FindIndex(c => c.To == toIdx);
@@ -195,226 +332,332 @@ namespace CSGraph
 
             return true;
         }
-    }
 
-    public class Graph : GraphImpl<Vertex<Connection>, Connection>, IGraph
-    {
-        public IReadOnlyCollection<int> Vertices => throw new NotImplementedException();
-        public IReadOnlyCollection<Edge<int>> Edges => throw new NotImplementedException();
-
-        public Graph() {}
-
-        public int AddVertex()
+        protected virtual void AddConnection(int fromIdx, TConnection connection)
         {
-            return CreateVertex(new());
+            if (!TryGetVertexByIndex(fromIdx, out var fromVertex))
+                throw new Exception("Nonexistant vertex");
+            
+            fromVertex.Connections.Add(connection);
+            ++numConnections;
         }
 
-        public void AddEdge(int fromIdx, int toIdx)
+        protected void RemoveConnectionByIndex(int fromIdx, int toIdx)
         {
-            CreateConnection(fromIdx, new(toIdx));
-            CreateConnection(toIdx, new(fromIdx));
+            if (!TryGetVertexByIndex(fromIdx, out var fromVertex) || !TryGetVertexByIndex(fromIdx, out var toVertex))
+                throw new Exception("Nonexistant vertex");
+            
+            int idx = fromVertex.Connections.FindIndex(c => c.To == toIdx);
+
+            if (idx == -1)
+                throw new Exception("Nonexistant connection");
+            
+            fromVertex.Connections[idx] = fromVertex.Connections[^1];
+            fromVertex.Connections.RemoveAt(fromVertex.Connections.Count - 1);
+            --numConnections;
         }
 
-        public bool ContainsVertex(int vertex)
+        protected virtual int AddVertexImpl(TVertex vertex)
         {
-            return ContainsVertexImpl(vertex);
+            adj.Vertices.Add(vertex);
+            return adj.Vertices.Count - 1;
         }
 
-        public bool ContainsEdge(int from, int to)
+        protected void RemoveEdgeByIndex(int from, int to)
         {
-            return TryGetConnection(from, to, out var connection);
-        }
-
-        public Edge<int>[] GetEdges(int vertex)
-        {
-            return Array.ConvertAll(GetNeighbors(vertex), idx => new Edge<int>(vertex, idx)).ToArray();
-        }
-
-        public int[] GetNeighbors(int vertex)
-        {
-            return GetNeighborsImpl(vertex);
-        }
-
-        public void RemoveEdge(int from, int to)
-        {
-            RemoveEdgeImpl(from, to);
-        }
-
-        public void RemoveVertex(int vertex)
-        {
-            RemoveVertexImpl(vertex);
-        }
-
-        public void Trim()
-        {
-            adj.Trim();
-        }
-    }
-
-    public class WeightedGraph<E> : GraphImpl<Vertex<Connection<E>>, Connection<E>>, IWeightedGraph<E>
-    {
-        public IReadOnlyCollection<int> Vertices => throw new NotImplementedException();
-        public IReadOnlyCollection<Edge<int, E>> Edges => throw new NotImplementedException();
-
-        public void AddEdge(int from, int to, E eData)
-        {
-            CreateConnection(from, new(to, eData));
-            CreateConnection(to, new(from, eData));
-        }
-
-        public void AddEdge(int from, int to)
-        {
-            CreateConnection(from, new(to, default));
-            CreateConnection(to, new(from, default));
-        }
-
-        public int AddVertex()
-        {
-            return CreateVertex(new());
-        }
-
-        public bool ContainsEdge(int from, int to)
-        {
-            return TryGetConnection(from, to, out var connection);
-        }
-
-        public bool ContainsVertex(int vertex)
-        {
-            return ContainsVertexImpl(vertex);
-        }
-
-        public E GetEdgeData(int from, int to)
-        {
-            if (!TryGetConnection(from, to, out Connection<E> c))
+            if (!TryGetConnectionByIndex(from, to, out TConnection c1) || !TryGetConnectionByIndex(to, from, out TConnection c2))
                 throw new Exception("Nonexistant edge");
             
-            return c.Data;
+            TryGetVertexByIndex(from, out var v1);
+            TryGetVertexByIndex(to, out var v2);
+
+            int idx = v1.Connections.FindIndex(c => c.To == to);
+            v1.Connections[idx] = v1.Connections[^1];
+            v1.Connections.RemoveAt(v1.Connections.Count - 1);
+
+            idx = v2.Connections.FindIndex(c => c.To == from);
+            v2.Connections[idx] = v2.Connections[^1];
+            v2.Connections.RemoveAt(v2.Connections.Count - 1);
         }
 
-        public Edge<int>[] GetEdges(int vertex)
+        protected int[] GetNeighborsByIndex(int vertex)
         {
-            return Array.ConvertAll(GetNeighbors(vertex), idx => new Edge<int>(vertex, idx)).ToArray();
+            if (!TryGetVertexByIndex(vertex, out var v))
+                throw new Exception("Nonexistant vertex");
+            
+            List<int> neighbors = new();
+
+            foreach (TConnection c in v.Connections)
+                if (!ContainsVertexByIndex(c.To))
+                    continue;
+                else
+                    neighbors.Add(c.To);
+
+            return neighbors.ToArray();
         }
 
-        public int[] GetNeighbors(int vertex)
+        protected void RemoveVertexByIndex(int vertex)
         {
-            return GetNeighborsImpl(vertex);
+            if (!TryGetVertexByIndex(vertex, out TVertex toRemove))
+                throw new Exception("Nonexistant vertex");
+            
+            TConnection[] connections = new TConnection[toRemove.Connections.Count];
+            toRemove.Connections.CopyTo(connections);
+            foreach (TConnection connection in connections)
+                RemoveEdgeByIndex(vertex, connection.To);
+
+            if (vertex != adj.Vertices.Count - 1)
+            {
+                /*
+                The last vertex in adj.Vertices is going to get moved to 'vertex'.
+                Any connections to this vertex need to be updated to reflect
+                the new index.
+                */
+                int oldIdx = adj.Vertices.Count - 1;
+                int newIdx = vertex;
+                TVertex lastVertex = adj.Vertices[oldIdx];
+
+                foreach (TConnection connection in lastVertex.Connections)
+                {
+                    TryGetConnectionByIndex(connection.To, oldIdx, out TConnection toUpdate);
+                    RemoveConnectionByIndex(connection.To, oldIdx);
+                    AddConnection(connection.To, toUpdate with {To = newIdx});
+                }
+
+                adj.Vertices[newIdx] = adj.Vertices[oldIdx];
+            }
+
+            adj.Vertices.RemoveAt(adj.Vertices.Count - 1);
         }
 
-        public void RemoveEdge(int from, int to)
+        protected virtual bool ContainsVertexByIndex(int vertex)
         {
-            RemoveEdgeImpl(from, to);
+            return vertex >= 0 && vertex < adj.Vertices.Count;
         }
 
-        public void RemoveVertex(int vertex)
+        public class IndexSet : IReadOnlyCollection<int>
         {
-            RemoveVertexImpl(vertex);
+            protected AdjacencyList<TVertex, TConnection> adj;
+
+            public int Count => adj.Vertices.Count;
+
+            public IndexSet(AdjacencyList<TVertex, TConnection> adj)
+            {
+                this.adj = adj;
+            }
+
+            public IEnumerator<int> GetEnumerator()
+            {
+                return new Enumerator(adj);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public class Enumerator : IEnumerator<int>
+            {
+                public int Current => idx;
+                object IEnumerator.Current => Current;
+
+                protected AdjacencyList<TVertex, TConnection> adj;
+                protected int idx = -1;
+
+                public Enumerator(AdjacencyList<TVertex, TConnection> adj)
+                {
+                    this.adj= adj;
+                }
+
+                public bool MoveNext()
+                {
+                    return ++idx < adj.Vertices.Count;
+                }
+
+                public void Reset()
+                {
+                    idx = -1;
+                }
+
+                public void Dispose()
+                {
+                    return;
+                }
+            }
         }
 
-        public void SetEdgeData(int from, int to, E data)
+        public class EdgeSet : IReadOnlyCollection<TEdge>
         {
-            RemoveEdgeImpl(from, to);
-            CreateConnection(from, new Connection<E>(to, data));
-            CreateConnection(to, new Connection<E>(from, data));
+            public int Count => graph.numConnections / 2;
+
+            protected GraphImpl<TVertex, TConnection, TEdge> graph;
+
+            public EdgeSet(GraphImpl<TVertex, TConnection, TEdge> graph)
+            {
+                this.graph = graph;
+            }
+
+            public IEnumerator<TEdge> GetEnumerator()
+            {
+                return new Enumerator(graph);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+
+            public class Enumerator : IEnumerator<TEdge>
+            {
+                public TEdge Current => graph.GetEdge(vEnum.Current, neighbors[neighborIdx]);
+                object IEnumerator.Current => Current;
+
+                protected GraphImpl<TVertex, TConnection, TEdge> graph;
+                protected IEnumerator<int> vEnum;
+                protected int[] neighbors = Array.Empty<int>();
+                protected int neighborIdx = -1;
+
+                public Enumerator(GraphImpl<TVertex, TConnection, TEdge> graph)
+                {
+                    this.graph = graph;
+                    vEnum = graph.Vertices.GetEnumerator();
+                }
+
+                public bool MoveNext()
+                {
+                    if (neighborIdx == -1)
+                    {
+                        if (!vEnum.MoveNext())
+                            return false;
+                        
+                        neighbors = graph.GetNeighborsByIndex(vEnum.Current);
+                    }
+
+                    ++neighborIdx;
+
+                    while(neighborIdx >= neighbors.Length)
+                    {
+                        if (!vEnum.MoveNext())
+                            return false;
+                        
+                        neighbors = graph.GetNeighborsByIndex(vEnum.Current);
+                        neighborIdx = 0;
+                    }
+
+                    // skip any connections for which from > to
+                    while(neighbors[neighborIdx] > vEnum.Current)
+                        MoveNext();
+
+                    return true;
+                }
+
+                public void Reset()
+                {
+                    vEnum.Reset();
+                    neighborIdx = -1;
+                    neighbors = Array.Empty<int>();
+                }
+
+                public void Dispose()
+                {
+                    vEnum.Dispose();
+                }
+            }
         }
     }
 
-    public class Graph<V> : GraphImpl<Vertex<V, Connection>, Connection>, IGraph<V>
+    public abstract class GraphImpl<V, TVertex, TConnection, TEdge> : GraphImpl<TVertex, TConnection, TEdge>
+        where V : notnull
+        where TVertex : struct, IVertex<V, TConnection>
+        where TConnection : struct, IConnection
     {
-        public IReadOnlyCollection<V> Vertices => throw new NotImplementedException();
-        public IReadOnlyCollection<Edge<V>> Edges => throw new NotImplementedException();
+        new public IReadOnlyCollection<V> Vertices => new VertexSet(new IndexSet(adj).GetEnumerator(), adj);
 
         protected Dictionary<V, int> indices = new();
 
-        public void AddVertex(V vData)
+        protected override int AddVertexImpl(TVertex v)
         {
-            int idx = CreateVertex(new(vData));
-            indices[vData] = idx;
+            int idx = base.AddVertexImpl(v);
+            indices[v.Data] = idx;
+            return idx;
         }
 
-        public void AddEdge(V from, V to)
-        {
-            if (!TryGetVertexByData(from, out var fromVertex) || !TryGetVertexByData(to, out var toVertex))
-                throw new Exception("Nonexistant vertex");
-            
-            TryGetIndexByData(from, out int fromIdx);
-            TryGetIndexByData(to, out int toIdx);
-            
-            CreateConnection(fromIdx, new Connection(toIdx));
-            CreateConnection(toIdx, new Connection(fromIdx));
-        }
-
-        public bool ContainsVertex(V vData)
+        protected bool ContainsVertexByData(V vData)
         {
             if (!indices.ContainsKey(vData))
                 return false;
             
             int idx = indices[vData];
-            return ContainsVertexImpl(idx);
+            return ContainsVertexByIndex(idx);
         }
 
-        public bool ContainsEdge(V from, V to)
+        protected bool ContainsEdgeByData(V from, V to)
         {
-            return TryGetConnectionByData(from, to, out Connection c);
+            return TryGetConnectionByData(from, to, out TConnection c);
         }
 
-        public V[] GetNeighbors(V vData)
+        protected V[] GetNeighborsByData(V vData)
         {
             if (!TryGetVertexByData(vData, out var v))
                 throw new Exception("Nonexistant vertex");
             
             List<V> neighbors = new();
 
-            foreach (Connection c in v.Connections)
-                if (!ContainsVertexImpl(c.To))
+            foreach (TConnection c in v.Connections)
+                if (!ContainsVertexByIndex(c.To))
                     continue;
                 else
-                    neighbors.Add(adj.Vertices[c.To].GetValueOrDefault().Data);
+                    neighbors.Add(adj.Vertices[c.To].Data);
 
             return neighbors.ToArray();
         }
 
-        public Edge<V>[] GetEdges(V vertex)
+        protected Edge<V>[] GetEdgesByData(V vertex)
         {
-            return Array.ConvertAll(GetNeighbors(vertex), vData => new Edge<V>(vertex, vData));
+            return Array.ConvertAll(GetNeighborsByData(vertex), vData => new Edge<V>(vertex, vData));
         }
 
-        public void RemoveEdge(V from, V to)
+        protected void RemoveVertexByData(V vertex)
         {
-            if (!TryGetConnectionByData(from, to, out Connection c1) || !TryGetConnectionByData(to, from, out Connection c2))
+            if (!TryGetIndexByData(vertex, out int idx))
+                throw new Exception("Nonexistant vertex");
+            
+            /*
+            If 'vertex' is not located at the end of adj.Vertices, then the last element is going
+            to be moved to the index of 'vertex' to facilitate faster deletion. The dictionary needs
+            to be updated with the new location of the last element.
+            */
+
+            if (idx != adj.Vertices.Count - 1)
+                indices[adj.Vertices[adj.Vertices.Count - 1].Data] = idx;
+            indices.Remove(vertex);
+
+            RemoveVertexByIndex(idx);
+        }
+
+        protected void RemoveEdgeByData(V from, V to)
+        {
+            if (!TryGetConnectionByData(from, to, out TConnection c1) || !TryGetConnectionByData(to, from, out TConnection c2))
                 throw new Exception("Nonexistant edge");
             
             TryGetIndexByData(from, out int fromIdx);
             TryGetIndexByData(to, out int toIdx);
 
-            RemoveEdgeImpl(fromIdx, toIdx);
+            RemoveEdgeByIndex(fromIdx, toIdx);
         }
 
-        public void RemoveVertex(V vertex)
+        protected bool TryGetVertexByData(V vData, out TVertex vertex)
         {
-            if (!TryGetIndexByData(vertex, out int idx))
-                throw new Exception("Nonexistant vertex");
-
-            RemoveVertexImpl(idx);
-        }
-
-        public void Trim()
-        {
-            adj.Trim();
-        }
-
-        private bool TryGetVertexByData(V vData, out Vertex<V, Connection> vertex)
-        {
-            vertex = new();
+            vertex = default;
 
             if (!TryGetIndexByData(vData, out int idx))
                 return false;
             
-            vertex = adj.Vertices[idx].GetValueOrDefault();
+            vertex = adj.Vertices[idx];
             return true;
         }
 
-        private bool TryGetIndexByData(V vData, out int idx)
+        protected bool TryGetIndexByData(V vData, out int idx)
         {
             idx = -1;
 
@@ -423,164 +666,76 @@ namespace CSGraph
             
             idx = indices[vData];
             
-            if (!ContainsVertexImpl(idx))
+            if (!ContainsVertexByIndex(idx))
                 return false;
 
             return true;
         }
 
-        private bool TryGetConnectionByData(V from, V to, out Connection connection)
+        protected bool TryGetConnectionByData(V from, V to, out TConnection connection)
         {
             connection = new();
 
             if (!TryGetIndexByData(from, out int fromIdx) || !TryGetIndexByData(to, out int toIdx))
                 return false;
             
-            return TryGetConnection(fromIdx, toIdx, out Connection c);
-        }
-    }
-
-    public class WeightedGraph<E, V> : GraphImpl<Vertex<V, Connection<E>>, Connection<E>>, IWeightedGraph<E, V>
-    {
-        public IReadOnlyCollection<V> Vertices => throw new NotImplementedException();
-        public IReadOnlyCollection<Edge<V, E>> Edges => throw new NotImplementedException();
-
-        Dictionary<V, int> indices = new();
-
-        public void AddVertex(V vData)
-        {
-            int idx = CreateVertex(new(vData));
-            indices[vData] = idx;
+            bool found = TryGetConnectionByIndex(fromIdx, toIdx, out TConnection c);
+            connection = c;
+            return found;
         }
 
-        public void AddEdge(V from, V to, E eData)
+        public class VertexSet : IReadOnlyCollection<V>
         {
-            if (!TryGetVertexByData(from, out var fromVertex) || !TryGetVertexByData(to, out var toVertex))
-                throw new Exception("Nonexistant vertex");
-            
-            TryGetIndexByData(from, out int fromIdx);
-            TryGetIndexByData(to, out int toIdx);
-            
-            CreateConnection(fromIdx, new Connection<E>(toIdx, eData));
-            CreateConnection(toIdx, new Connection<E>(fromIdx, eData));
-        }
+            public int Count => adj.Vertices.Count;
 
-        public void AddEdge(V from, V to)
-        {
-            AddEdge(from, to, default);
-        }
+            protected IEnumerator<int> indices;
+            protected AdjacencyList<TVertex, TConnection> adj;
 
-        public bool ContainsVertex(V vData)
-        {
-            if (!indices.ContainsKey(vData))
-                return false;
-            
-            int idx = indices[vData];
-            return ContainsVertexImpl(idx);
-        }
+            public VertexSet(IEnumerator<int> indices, AdjacencyList<TVertex, TConnection> adj)
+            {
+                this.indices = indices;
+                this.adj = adj;
+            }
 
-        public bool ContainsEdge(V from, V to)
-        {
-            return TryGetConnectionByData(from, to, out Connection<E> c);
-        }
+            public IEnumerator<V> GetEnumerator()
+            {
+                return new Enumerator(indices, adj);
+            }
 
-        public V[] GetNeighbors(V vData)
-        {
-            if (!TryGetVertexByData(vData, out var v))
-                throw new Exception("Nonexistant vertex");
-            
-            List<V> neighbors = new();
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
 
-            foreach (Connection<E> c in v.Connections)
-                if (!ContainsVertexImpl(c.To))
-                    continue;
-                else
-                    neighbors.Add(adj.Vertices[c.To].GetValueOrDefault().Data);
+            public class Enumerator : IEnumerator<V>
+            {
+                public V Current => adj.Vertices[indices.Current].Data;
+                object IEnumerator.Current => Current;
 
-            return neighbors.ToArray();
-        }
+                protected IEnumerator<int> indices;
+                protected AdjacencyList<TVertex, TConnection> adj;
 
-        public Edge<V>[] GetEdges(V vertex)
-        {
-            return Array.ConvertAll(GetNeighbors(vertex), vData => new Edge<V>(vertex, vData));
-        }
+                public Enumerator(IEnumerator<int> indices, AdjacencyList<TVertex, TConnection> adj)
+                {
+                    this.indices = indices;
+                    this.adj = adj;
+                }
 
-        public E GetEdgeData(V from, V to)
-        {
-            if (!TryGetConnectionByData(from, to, out Connection<E> c))
-                throw new Exception("Nonexistant edge");
-            
-            return c.Data;
-        }
+                public bool MoveNext()
+                {
+                    return indices.MoveNext();
+                }
 
-        public void SetEdgeData(V from, V to, E data)
-        {
-            if (!TryGetIndexByData(from, out var fromIdx) || !TryGetIndexByData(to, out var toIdx))
-                throw new Exception("Nonexistant vertex");
+                public void Reset()
+                {
+                    indices.Reset();
+                }
 
-            RemoveEdge(from, to);
-            CreateConnection(fromIdx, new Connection<E>(toIdx, data));
-            CreateConnection(toIdx, new Connection<E>(fromIdx, data));
-        }
-
-        public void RemoveEdge(V from, V to)
-        {
-            if (!TryGetConnectionByData(from, to, out Connection<E> c1) || !TryGetConnectionByData(to, from, out Connection<E> c2))
-                throw new Exception("Nonexistant edge");
-            
-            TryGetIndexByData(from, out int fromIdx);
-            TryGetIndexByData(to, out int toIdx);
-
-            RemoveEdgeImpl(fromIdx, toIdx);
-        }
-
-        public void RemoveVertex(V vertex)
-        {
-            if (!TryGetIndexByData(vertex, out int idx))
-                throw new Exception("Nonexistant vertex");
-
-            RemoveVertexImpl(idx);
-        }
-
-        public void Trim()
-        {
-            adj.Trim();
-        }
-
-        private bool TryGetVertexByData(V vData, out Vertex<V, Connection<E>> vertex)
-        {
-            vertex = new();
-
-            if (!TryGetIndexByData(vData, out int idx))
-                return false;
-            
-            vertex = adj.Vertices[idx].GetValueOrDefault();
-            return true;
-        }
-
-        private bool TryGetIndexByData(V vData, out int idx)
-        {
-            idx = -1;
-
-            if (!indices.ContainsKey(vData))
-                return false;
-            
-            idx = indices[vData];
-            
-            if (!ContainsVertexImpl(idx))
-                return false;
-
-            return true;
-        }
-
-        private bool TryGetConnectionByData(V from, V to, out Connection<E> connection)
-        {
-            connection = new();
-
-            if (!TryGetIndexByData(from, out int fromIdx) || !TryGetIndexByData(to, out int toIdx))
-                return false;
-            
-            return TryGetConnection(fromIdx, toIdx, out Connection<E> c);
+                public void Dispose()
+                {
+                    indices.Dispose();
+                }
+            }
         }
     }
 }

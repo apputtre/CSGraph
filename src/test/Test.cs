@@ -3,48 +3,6 @@ using CSGraph;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
-struct S1 {};
-struct S2 {int x;}
-ref struct S3 {}
-
-public ref struct S {
-	int x;
-	int y;
-	ref List<int> l;
-}
-
-public class C1 {}
-
-public class C2 {int x;}
-
-public class A
-{
-	public static int x = 0;
-
-	public void Test()
-	{
-		++x;
-	}
-}
-
-public abstract class B
-{
-	public static int x = 0;
-
-	public void Test()
-	{
-		++x;
-	}
-}
-
-public class BDerived : B
-{
-    new public void Test()
-    {
-        ++x;
-    }
-}
-
 public static class Test
 {
     public static void Main()
@@ -83,33 +41,25 @@ public static class Test
 
 		graph.AddEdge('h', 'i', 7);
 
+		graph.RemoveVertex('d');
+
         System.Console.WriteLine("Graph:");
 		foreach (Edge<char, int> edge in graph.Edges)
 			Console.WriteLine($"{edge.From} => {edge.To}, {edge.Data}");
 
-		GraphAlgorithms.Dijkstra<char>(graph, 'a', out var costs, out var routes);
+		CSGraph.Algorithms.Dijkstra<char>(graph, 'a', out var costs, out var routes);
 
         System.Console.WriteLine("\nShortest path from 'a' to 'e':");
-		List<char> path = GraphAlgorithms.ShortestPath<char>(routes, 'e');
+		List<char> path = Algorithms.ShortestPath<char>(routes, 'e');
 
 		foreach (char c in path)
 			Console.Write(c + ", ");
         Console.WriteLine($"\nCost of shortest path: {costs['e']}");
 
-		WeightedGraph<int, char> mst = GraphAlgorithms.Prims(graph, 'a');
+		WeightedGraph<int, char> mst = Algorithms.Prims(graph, 'a');
 
         Console.WriteLine("\nMST with 'a' as source vertex:");
 		foreach (Edge<char, int> e in mst.Edges)
 			Console.WriteLine($"{e.From} => {e.To}, {e.Data}");
-		
-		WeightedGraph w = new();
-		int v1 = w.AddVertex();
-		int v2 = w.AddVertex();
-		w.AddEdge(v1, v2);
-		Console.WriteLine(w.GetEdgeData(v1, v2));
-		w.SetEdgeData(v1, v2, 10);
-		Console.WriteLine(w.GetEdgeData(v1, v2));
-		Console.WriteLine(w.GetEdgeData(v2, v1));
-		Console.WriteLine(v1 + " " + v2);
 	}
 }
