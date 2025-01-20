@@ -105,9 +105,9 @@ namespace CSGraph
             return c.Data;
         }
 
-        public Edge<int>[] GetEdges(int vertex)
+        public Edge<int, E?>[] GetEdges(int vertex)
         {
-            return Array.ConvertAll(GetNeighbors(vertex), idx => new Edge<int>(vertex, idx)).ToArray();
+            return GetEdgesByIndex(vertex);
         }
 
         public int[] GetNeighbors(int vertex)
@@ -198,7 +198,7 @@ namespace CSGraph
         }
     }
 
-    public class WeightedGraph<E, V> : GraphImpl<V, Vertex<V, Connection<E>>, Connection<E>, Edge<V, E>>, IWeightedGraph<E, V>
+    public class WeightedGraph<E, V> : GraphImpl<V, Vertex<V, Connection<E>>, Connection<E>, Edge<V, E?>>, IWeightedGraph<E?, V>
         where V : notnull
     {
         public E? DefaultEdgeDataValue {get; set;}
@@ -245,7 +245,7 @@ namespace CSGraph
             return GetNeighborsByData(vData);
         }
 
-        public Edge<V>[] GetEdges(V vertex)
+        public Edge<V, E?>[] GetEdges(V vertex)
         {
             return GetEdgesByData(vertex);
         }
@@ -278,7 +278,7 @@ namespace CSGraph
             RemoveVertexByData(vertex);
         }
 
-        protected override Edge<V, E> GetEdge(int fromIdx, int toIdx)
+        protected override Edge<V, E?> GetEdge(int fromIdx, int toIdx)
         {
             if (!TryGetConnectionByIndex(fromIdx, toIdx, out var connection))
                 throw new Exception("Nonexistant edge");
@@ -286,7 +286,7 @@ namespace CSGraph
             V vData1 = adj.Vertices[fromIdx].Data;
             V vData2 = adj.Vertices[toIdx].Data;
             
-            return new Edge<V, E>(vData1, vData2, connection.Data);
+            return new Edge<V, E?>(vData1, vData2, connection.Data);
         }
     }
 }
@@ -433,6 +433,17 @@ namespace CSGraph.Implementation
         protected virtual bool ContainsVertexByIndex(int vertex)
         {
             return vertex >= 0 && vertex < adj.Vertices.Count;
+        }
+
+        protected TEdge[] GetEdgesByIndex(int vertex)
+        {
+            int[] neighbors = GetNeighborsByIndex(vertex);
+            TEdge[] edges = new TEdge[neighbors.Length];
+
+            for(int i = 0; i < neighbors.Length; ++i)
+                edges[i] = GetEdge(vertex, neighbors[i]);
+            
+            return edges;
         }
 
         public virtual void Clear()
@@ -618,11 +629,6 @@ namespace CSGraph.Implementation
             return neighbors.ToArray();
         }
 
-        protected Edge<V>[] GetEdgesByData(V vertex)
-        {
-            return Array.ConvertAll(GetNeighborsByData(vertex), vData => new Edge<V>(vertex, vData));
-        }
-
         protected void RemoveVertexByData(V vertex)
         {
             if (!TryGetIndexByData(vertex, out int idx))
@@ -688,6 +694,14 @@ namespace CSGraph.Implementation
             bool found = TryGetConnectionByIndex(fromIdx, toIdx, out TConnection c);
             connection = c;
             return found;
+        }
+
+        protected TEdge[] GetEdgesByData(V vertex)
+        {
+            if (!TryGetIndexByData(vertex, out int idx))
+                throw new Exception("Nonexistant vertex");
+            
+            return GetEdgesByIndex(idx);
         }
 
         public override void Clear()

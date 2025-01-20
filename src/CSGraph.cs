@@ -55,7 +55,7 @@ namespace CSGraph
         public abstract bool ContainsEdge(int from, int to);
         public abstract void AddEdge(int from, int to);
         public abstract void RemoveEdge(int from, int to);
-        public abstract Edge<int>[] GetEdges(int vertex);
+        public abstract Edge<int, E?>[] GetEdges(int vertex);
         public abstract int[] GetNeighbors(int vertex);
         public abstract void AddEdge(int from, int to, E? eData);
         public abstract void SetEdgeData(int from, int to, E? data);
@@ -91,7 +91,7 @@ namespace CSGraph
         public abstract void RemoveVertex(V vertex);
         public abstract bool ContainsEdge(V from, V to);
         public abstract void RemoveEdge(V from, V to);
-        public abstract Edge<V>[] GetEdges(V vertex);
+        public abstract Edge<V, E?>[] GetEdges(V vertex);
         public abstract V[] GetNeighbors(V vertex);
         public abstract void AddEdge(V from, V to, E eData);
         public abstract void AddEdge(V from, V to);
