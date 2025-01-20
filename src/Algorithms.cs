@@ -4,13 +4,6 @@ namespace CSGraph
 {
     public static class Algorithms
     {
-
-        public static void Test()
-        {
-            PriorityQueue<int, int> queue = new();
-            queue.SetPriority(5, 5);
-        }
-
         #nullable enable
         public static void Dijkstra<V>
         (
